@@ -1,4 +1,4 @@
-import { User, Project, MilestoneStatus, UserRole, Transaction, TransactionType, TransactionStatus, Investment, PaymentMethod, PaymentMethodType, MobileMoneyProvider, UgandanBank } from './types';
+import { User, Project, MilestoneStatus, UserRole, Transaction, TransactionType, TransactionStatus, Investment, PaymentMethod, PaymentMethodType, MobileMoneyProvider, UgandanBank, Message, Conversation } from './types';
 
 export const MOCK_USERS: User[] = [
   {
@@ -183,7 +183,7 @@ export const MOCK_PROJECTS: Project[] = [
     fundingGoal: 85000,
     currentFunding: 28000,
     smartContractAddress: '0xContract...A1',
-    imageUrl: 'https://images.unsplash.com/photo-1497633762265-9d179a990aa6?q=80&w=2073&auto=format&fit=crop',
+    imageUrl: 'https://images.unsplash.com/photo-1557682250-33bd709cbe85?q=80&w=2029&auto=format&fit=crop',
     milestones: [
       {
         id: 'm1',
@@ -221,7 +221,7 @@ export const MOCK_PROJECTS: Project[] = [
     fundingGoal: 120000,
     currentFunding: 45000,
     smartContractAddress: '0xContract...B2',
-    imageUrl: 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=2070&auto=format&fit=crop',
+    imageUrl: 'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?q=80&w=2070&auto=format&fit=crop',
     milestones: [
       {
         id: 'm1',
@@ -258,7 +258,7 @@ export const MOCK_PROJECTS: Project[] = [
     fundingGoal: 95000,
     currentFunding: 0,
     smartContractAddress: '0xContract...C3',
-    imageUrl: 'https://images.unsplash.com/photo-1541960071727-c531398e7494?q=80&w=2148&auto=format&fit=crop',
+    imageUrl: 'https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?q=80&w=2070&auto=format&fit=crop',
     milestones: [
       {
         id: 'm1',
@@ -483,5 +483,103 @@ export const MOCK_PAYMENT_METHODS: PaymentMethod[] = [
     mobileProvider: MobileMoneyProvider.AIRTEL,
     phoneNumber: '256752987654',
     registeredName: 'David Okello'
+  }
+];
+
+export const MOCK_MESSAGES: Message[] = [
+  {
+    id: 'msg1',
+    senderId: 'u1',
+    receiverId: 'u2',
+    content: 'Thank you so much for investing in our Northern Uganda Girls Education Program! Your support will help 200 girls access quality education.',
+    timestamp: '2024-01-23T09:30:00Z',
+    read: true
+  },
+  {
+    id: 'msg2',
+    senderId: 'u2',
+    receiverId: 'u1',
+    content: 'We\'re excited to support your work! Can you share more details about the progress on the first milestone?',
+    timestamp: '2024-01-23T14:15:00Z',
+    read: true
+  },
+  {
+    id: 'msg3',
+    senderId: 'u1',
+    receiverId: 'u2',
+    content: 'Absolutely! We\'ve already procured uniforms for 150 girls and are working on the remaining 50. School fees for Term 1 have been paid for all 200 girls. We\'ll submit the proof documents by next week.',
+    timestamp: '2024-01-24T10:45:00Z',
+    read: true
+  },
+  {
+    id: 'msg4',
+    senderId: 'u2',
+    receiverId: 'u1',
+    content: 'That\'s wonderful progress! Looking forward to reviewing the documentation. How are the communities responding to the program?',
+    timestamp: '2024-01-24T16:20:00Z',
+    read: false
+  },
+  {
+    id: 'msg5',
+    senderId: 'u8',
+    receiverId: 'u9',
+    content: 'Hello! I invested in your Orphan Care & Feeding Program. Could you provide an update on the feeding program implementation?',
+    timestamp: '2023-12-12T11:00:00Z',
+    read: true
+  },
+  {
+    id: 'msg6',
+    senderId: 'u9',
+    receiverId: 'u8',
+    content: 'Thank you for reaching out! We\'re currently serving 150 children daily meals. The children have shown improved attendance and health. We\'re documenting everything for the milestone review.',
+    timestamp: '2023-12-12T15:30:00Z',
+    read: true
+  },
+  {
+    id: 'msg7',
+    senderId: 'u8',
+    receiverId: 'u9',
+    content: 'That\'s great to hear! Would it be possible to visit the feeding center sometime this month?',
+    timestamp: '2023-12-13T09:15:00Z',
+    read: true
+  },
+  {
+    id: 'msg8',
+    senderId: 'u9',
+    receiverId: 'u8',
+    content: 'Of course! We welcome donor visits. Let me coordinate with our team and send you some available dates. The children would love to meet you!',
+    timestamp: '2023-12-13T13:45:00Z',
+    read: false
+  }
+];
+
+export const MOCK_CONVERSATIONS: Conversation[] = [
+  {
+    id: 'conv1',
+    participants: ['u2', 'u1'],
+    projectId: 'p1',
+    lastMessage: {
+      id: 'msg4',
+      senderId: 'u2',
+      receiverId: 'u1',
+      content: 'That\'s wonderful progress! Looking forward to reviewing the documentation. How are the communities responding to the program?',
+      timestamp: '2024-01-24T16:20:00Z',
+      read: false
+    },
+    lastMessageTime: '2024-01-24T16:20:00Z'
+  },
+  {
+    id: 'conv2',
+    participants: ['u8', 'u9'],
+    projectId: 'p2',
+    lastMessage: {
+      id: 'msg8',
+      senderId: 'u9',
+      receiverId: 'u8',
+      content: 'Of course! We welcome donor visits. Let me coordinate with our team and send you some available dates. The children would love to meet you!',
+      timestamp: '2023-12-13T13:45:00Z',
+      read: false
+    },
+    lastMessageTime: '2023-12-13T13:45:00Z'
   }
 ];

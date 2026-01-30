@@ -5,6 +5,7 @@ import { AuthPage } from './pages/AuthPage';
 import { CreatorDashboard } from './pages/CreatorDashboard';
 import { DonorDashboard } from './pages/DonorDashboard';
 import { UserRole } from './types';
+import { Toaster } from 'sonner';
 
 const MainContent: React.FC = () => {
   const { currentUser } = useApp();
@@ -27,6 +28,12 @@ export default function App() {
     <ThemeProvider defaultTheme="dark" storageKey="texora-ui-theme">
       <AppProvider>
         <MainContent />
+        <Toaster
+          theme="dark"
+          position="top-right"
+          richColors
+          closeButton
+        />
       </AppProvider>
     </ThemeProvider>
   );

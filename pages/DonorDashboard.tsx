@@ -3,21 +3,38 @@ import { useApp } from '../AppContext';
 import { Card } from '@/components/Card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Skeleton } from '@/components/ui/skeleton';
 import { MilestoneTracker } from '../components/MilestoneTracker';
+import { InvestmentModal } from '../components/InvestmentModal';
 import { AppSidebar } from '@/components/app-sidebar';
 import { SidebarProvider } from '@/components/ui/sidebar';
-import { Project, MatchScore } from '../types';
-import { getMatchAnalysis } from '../services/geminiService';
-import { Sparkles, ArrowRight, Target, Wallet, ShieldCheck, CheckCircle2, Building2, Globe, MapPin, DollarSign, Briefcase, Link as LinkIcon, Linkedin, X, Coins, TrendingUp, RefreshCw, ArrowUpRight, ArrowDownLeft } from 'lucide-react';
+import { Project } from '../types';
+import { Sparkles, ArrowRight, Target, Wallet, ShieldCheck, CheckCircle2, Building2, Globe, MapPin, DollarSign, Briefcase, Link as LinkIcon, Linkedin, X, Coins, TrendingUp, RefreshCw, ArrowUpRight, ArrowDownLeft, Send, MessageCircle, User, Clock, Search, Filter, SlidersHorizontal } from 'lucide-react';
 import { Web3Badge } from '../components/Web3Badge';
+import { MatchScore } from '../types';
+import { useDebounce } from '../hooks/useDebounce';
+import { toast } from 'sonner';
 
 export const DonorDashboard: React.FC = () => {
-  const { projects, currentUser } = useApp();
+  const { projects, currentUser, users, createInvestment, getInvestmentsByDonor, getTransactionsByUser, getUserConversations, getConversationMessages, sendMessage } = useApp();
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [showInvestmentModal, setShowInvestmentModal] = useState(false);
+  const [investingProject, setInvestingProject] = useState<Project | null>(null);
+  const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
+  const [newMessage, setNewMessage] = useState('');
   const [aiMatches, setAiMatches] = useState<Record<string, MatchScore>>({});
   const [loadingAI, setLoadingAI] = useState(false);
-  const [activeTab, setActiveTab] = useState('discover');
+  const [activeTab, setActiveTab] = useState('dashboard');
   const [dashboardTab, setDashboardTab] = useState<'discover' | 'portfolio'>('discover');
+
+  // Discovery filters
+  const [searchQuery, setSearchQuery] = useState('');
+  const debouncedSearch = useDebounce(searchQuery, 300);
+  const [selectedCategory, setSelectedCategory] = useState('All');
+  const [sortBy, setSortBy] = useState<'match' | 'progress' | 'recent'>('match');
+
+  // Profile editing
+  const [newInterestInput, setNewInterestInput] = useState('');
 
   // Profile State with detailed investor fields
   const [profileData, setProfileData] = useState({
@@ -36,34 +53,39 @@ export const DonorDashboard: React.FC = () => {
   const [isEditingProfile, setIsEditingProfile] = useState(false);
 
   useEffect(() => {
-    const runMatching = async () => {
-        if (!currentUser) return;
-        setLoadingAI(true);
-        const newMatches: Record<string, MatchScore> = {};
-        await Promise.all(projects.map(async (p) => {
-             const result = await getMatchAnalysis(p, [currentUser]);
-             if (result && result.length > 0) {
-                 newMatches[p.id] = result[0];
-             }
-        }));
-        setAiMatches(newMatches);
-        setLoadingAI(false);
-    };
-    runMatching();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    // Generate match scores from JSON data (no AI)
+    if (!currentUser) return;
+    const newMatches: Record<string, MatchScore> = {};
+    projects.forEach((p) => {
+        // Calculate match based on interest overlap
+        const interestOverlap = currentUser.interests.some(interest => 
+            p.category.toLowerCase().includes(interest.toLowerCase()) ||
+            interest.toLowerCase().includes(p.category.toLowerCase())
+        );
+        newMatches[p.id] = {
+            projectId: p.id,
+            donorId: currentUser.id,
+            score: interestOverlap ? 90 + Math.floor(Math.random() * 8) : 75 + Math.floor(Math.random() * 15),
+            reason: `Based on your interest in ${currentUser.interests[0]} and the project's focus on ${p.category}.`
+        };
+    });
+    setAiMatches(newMatches);
+  }, [currentUser, projects]);
 
   const handleSaveProfile = () => {
       setIsEditingProfile(false);
+      toast.success('Profile updated successfully!', {
+        description: 'Your investor profile has been saved'
+      });
       // Logic to sync with backend/blockchain would go here
       // For now, we just update local state which is already done via onChange
       // In a real app, we'd call an API here.
   };
 
   const addInterest = () => {
-      const newInterest = prompt("Enter new industry focus:");
-      if (newInterest && !profileData.interests.includes(newInterest)) {
-          setProfileData(prev => ({ ...prev, interests: [...prev.interests, newInterest] }));
+      if (newInterestInput.trim() && !profileData.interests.includes(newInterestInput.trim())) {
+          setProfileData(prev => ({ ...prev, interests: [...prev.interests, newInterestInput.trim()] }));
+          setNewInterestInput('');
       }
   };
 
@@ -74,10 +96,24 @@ export const DonorDashboard: React.FC = () => {
       }));
   };
 
+  // Handle project selection from sidebar
+  const handleProjectSelect = (projectId: string) => {
+    const project = projects.find(p => p.id === projectId);
+    if (project) {
+      setSelectedProject(project);
+      setActiveTab('dashboard');
+      setDashboardTab('discover');
+    }
+  };
+
   return (
     <SidebarProvider>
       <div className="flex min-h-screen bg-background w-full">
-        <AppSidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+        <AppSidebar 
+          activeTab={activeTab} 
+          setActiveTab={setActiveTab} 
+          onProjectSelect={handleProjectSelect}
+        />
       
       <div className="flex-1 overflow-y-auto h-screen">
          {activeTab === 'dashboard' && (
@@ -104,7 +140,8 @@ export const DonorDashboard: React.FC = () => {
                     </div>
                 </div>
 
-                {selectedProject ? (
+                {/* DISCOVER TAB */}
+               {dashboardTab === 'discover' && selectedProject ? (
                   <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                      <Button variant="ghost" onClick={() => setSelectedProject(null)} className="mb-4 pl-0 hover:pl-2 transition-all text-muted-foreground hover:text-foreground">
                          &larr; Back to Listings
@@ -168,7 +205,16 @@ export const DonorDashboard: React.FC = () => {
                                          "{aiMatches[selectedProject.id]?.reason || "Calculating compatibility..."}"
                                       </p>
                                  </div>
-                                 <Button className="w-full bg-emerald-600 hover:bg-emerald-700 text-primary-foreground border-0" size="lg">Fund Project</Button>
+                                 <Button
+                                   className="w-full bg-emerald-600 hover:bg-emerald-700 text-primary-foreground border-0"
+                                   size="lg"
+                                   onClick={() => {
+                                     setInvestingProject(selectedProject);
+                                     setShowInvestmentModal(true);
+                                   }}
+                                 >
+                                   Fund Project
+                                 </Button>
                               </Card>
 
                               <Card title="Transparency Data">
@@ -190,9 +236,106 @@ export const DonorDashboard: React.FC = () => {
                          </div>
                      </div>
                   </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                     {projects.map(project => {
+                ) : null}
+
+               {/* DISCOVER TAB - Project Grid */}
+               {dashboardTab === 'discover' && !selectedProject && (() => {
+                  // Filter and sort projects
+                  const categories = ['All', ...Array.from(new Set(projects.map(p => p.category)))];
+
+                  const filteredProjects = projects
+                    .filter(p => {
+                      const matchesSearch = p.title.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+                                           p.description.toLowerCase().includes(debouncedSearch.toLowerCase());
+                      const matchesCategory = selectedCategory === 'All' || p.category === selectedCategory;
+                      return matchesSearch && matchesCategory;
+                    })
+                    .sort((a, b) => {
+                      if (sortBy === 'match') {
+                        return (aiMatches[b.id]?.score || 0) - (aiMatches[a.id]?.score || 0);
+                      } else if (sortBy === 'progress') {
+                        return (b.currentFunding / b.fundingGoal) - (a.currentFunding / a.fundingGoal);
+                      } else {
+                        return 0; // 'recent' - keep original order
+                      }
+                    });
+
+                  return (
+                    <>
+                      {/* Search, Filter, Sort Bar */}
+                      <div className="mb-6 space-y-4">
+                        {/* Stats Banner */}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <div className="bg-zinc-900/50 border border-zinc-800 rounded-lg p-4">
+                            <div className="flex items-center gap-2 text-zinc-400 mb-1">
+                              <Briefcase size={16} />
+                              <span className="text-sm">Total Projects</span>
+                            </div>
+                            <p className="text-2xl font-bold text-white">{projects.length}</p>
+                          </div>
+                          <div className="bg-zinc-900/50 border border-zinc-800 rounded-lg p-4">
+                            <div className="flex items-center gap-2 text-zinc-400 mb-1">
+                              <Filter size={16} />
+                              <span className="text-sm">Showing</span>
+                            </div>
+                            <p className="text-2xl font-bold text-white">{filteredProjects.length}</p>
+                          </div>
+                          <div className="bg-zinc-900/50 border border-zinc-800 rounded-lg p-4">
+                            <div className="flex items-center gap-2 text-zinc-400 mb-1">
+                              <Sparkles size={16} />
+                              <span className="text-sm">Avg Match Score</span>
+                            </div>
+                            <p className="text-2xl font-bold text-white">
+                              {aiMatches && Object.keys(aiMatches).length > 0 ? Math.round(
+                                Object.values(aiMatches).reduce((sum, m) => sum + m.score, 0) /
+                                Object.values(aiMatches).length
+                              ) : 0}%
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Search and Filters */}
+                        <div className="flex flex-col md:flex-row gap-3">
+                          {/* Search */}
+                          <div className="relative flex-1">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={18} />
+                            <Input
+                              type="text"
+                              placeholder="Search projects..."
+                              value={searchQuery}
+                              onChange={(e) => setSearchQuery(e.target.value)}
+                              className="pl-10 bg-zinc-950 border-zinc-800 text-white placeholder:text-zinc-500"
+                            />
+                          </div>
+
+                          {/* Category Filter */}
+                          <select
+                            value={selectedCategory}
+                            onChange={(e) => setSelectedCategory(e.target.value)}
+                            className="px-4 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-white focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                          >
+                            {categories.map(cat => (
+                              <option key={cat} value={cat}>{cat}</option>
+                            ))}
+                          </select>
+
+                          {/* Sort */}
+                          <select
+                            value={sortBy}
+                            onChange={(e) => setSortBy(e.target.value as 'match' | 'progress' | 'recent')}
+                            className="px-4 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-white focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                          >
+                            <option value="match">Sort: Match Score</option>
+                            <option value="progress">Sort: Funding Progress</option>
+                            <option value="recent">Sort: Recently Added</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      {/* Project Grid */}
+                      {filteredProjects.length > 0 ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                          {filteredProjects.map(project => {
                          const matchData = aiMatches[project.id];
                          const score = matchData?.score || 0;
                          
@@ -237,10 +380,134 @@ export const DonorDashboard: React.FC = () => {
                          );
                      })}
                   </div>
-                )}
+                      ) : (
+                        <div className="flex items-center justify-center py-16 text-zinc-500">
+                          <div className="text-center">
+                            <Search className="mx-auto mb-4 opacity-20" size={64} />
+                            <h3 className="text-lg font-medium text-white mb-2">No projects found</h3>
+                            <p className="text-sm mb-4">Try adjusting your search or filters</p>
+                            <Button
+                              variant="outline"
+                              onClick={() => {
+                                setSearchQuery('');
+                                setSelectedCategory('All');
+                              }}
+                            >
+                              Clear Filters
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  );
+                })()}
+
+               {/* PORTFOLIO TAB */}
+               {dashboardTab === 'portfolio' && (
+                  <div className="space-y-6">
+                     {/* Portfolio Stats */}
+                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <Card className="text-center p-6">
+                           <p className="text-3xl font-bold text-white">
+                              {getInvestmentsByDonor(currentUser?.id || '').length}
+                           </p>
+                           <p className="text-sm text-zinc-400 mt-1">Active Investments</p>
+                        </Card>
+                        <Card className="text-center p-6">
+                           <p className="text-3xl font-bold text-emerald-400">
+                              UGX {(currentUser?.totalInvested || 0).toLocaleString()}
+                           </p>
+                           <p className="text-sm text-zinc-400 mt-1">Total Invested</p>
+                        </Card>
+                        <Card className="text-center p-6">
+                           <p className="text-3xl font-bold text-white">
+                              {Math.round((getInvestmentsByDonor(currentUser?.id || '').reduce((sum, inv) => {
+                                 const project = projects.find(p => p.id === inv.projectId);
+                                 return sum + ((project?.currentFunding || 0) / (project?.fundingGoal || 1));
+                              }, 0) / Math.max(getInvestmentsByDonor(currentUser?.id || '').length, 1)) * 100) || 0}%
+                           </p>
+                           <p className="text-sm text-zinc-400 mt-1">Avg Project Progress</p>
+                        </Card>
+                     </div>
+
+                     {/* Investment List */}
+                     {getInvestmentsByDonor(currentUser?.id || '').length > 0 ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                           {getInvestmentsByDonor(currentUser?.id || '').map(investment => {
+                              const project = projects.find(p => p.id === investment.projectId);
+                              if (!project) return null;
+
+                              const progress = Math.round((project.currentFunding / project.fundingGoal) * 100);
+
+                              return (
+                                 <Card key={investment.id} className="group relative flex flex-col h-full hover:border-emerald-500 transition-colors cursor-pointer">
+                                    <div onClick={() => {
+                                       setSelectedProject(project);
+                                       setDashboardTab('discover');
+                                    }} className="flex-1">
+                                       <div className="h-48 overflow-hidden rounded-md mb-4 relative">
+                                          <img src={project.imageUrl} alt={project.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                                          <div className="absolute top-2 right-2 bg-emerald-500/90 backdrop-blur-sm text-white text-xs font-bold px-3 py-1 rounded-full">
+                                             Invested
+                                          </div>
+                                       </div>
+
+                                       <div className="mb-2">
+                                          <Web3Badge>{project.category}</Web3Badge>
+                                       </div>
+
+                                       <h3 className="text-xl font-semibold mb-2 line-clamp-1">{project.title}</h3>
+                                       <p className="text-zinc-400 text-sm mb-4">
+                                          Invested: <span className="text-emerald-400 font-bold">UGX {investment.amount.toLocaleString()}</span>
+                                       </p>
+                                       <p className="text-xs text-zinc-500">
+                                          {new Date(investment.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                                       </p>
+                                    </div>
+
+                                    <div className="pt-4 border-t border-zinc-800 mt-auto">
+                                       <div className="flex justify-between items-center mb-2">
+                                          <span className="text-xs text-zinc-500">Project Progress</span>
+                                          <span className="text-xs text-zinc-400">{progress}%</span>
+                                       </div>
+                                       <div className="w-full bg-zinc-800 h-1.5 rounded-full mb-4">
+                                          <div className="bg-emerald-500 h-1.5 rounded-full" style={{ width: `${progress}%` }}></div>
+                                       </div>
+                                       <div className="flex items-center justify-between text-xs">
+                                          <span className={`px-2 py-1 rounded ${
+                                             investment.status === 'active' ? 'bg-emerald-900/30 text-emerald-400' : 'bg-zinc-800 text-zinc-400'
+                                          }`}>
+                                             {investment.status}
+                                          </span>
+                                          <span className="text-zinc-500">
+                                             {project.milestones.filter(m => m.status === 'APPROVED').length}/{project.milestones.length} milestones
+                                          </span>
+                                       </div>
+                                    </div>
+                                 </Card>
+                              );
+                           })}
+                        </div>
+                     ) : (
+                        <Card className="p-12 text-center">
+                           <div className="mb-4 text-zinc-600">
+                              <Coins size={64} className="mx-auto mb-4 opacity-20" />
+                           </div>
+                           <h3 className="text-xl font-bold text-white mb-2">No Investments Yet</h3>
+                           <p className="text-zinc-400 mb-6">Start investing in projects to build your portfolio</p>
+                           <Button
+                              onClick={() => setDashboardTab('discover')}
+                              className="bg-emerald-600 hover:bg-emerald-700 text-white border-0"
+                           >
+                              Discover Projects
+                           </Button>
+                        </Card>
+                     )}
+                  </div>
+               )}
              </div>
          )}
-         
+
          {activeTab === 'profile' && (
              <div className=" mx-auto p-8 space-y-8 animate-in fade-in slide-in-from-bottom-4">
                 {/* Header */}
@@ -269,11 +536,15 @@ export const DonorDashboard: React.FC = () => {
                             
                             <div className="w-full grid grid-cols-2 gap-2 text-center mb-6">
                                 <div className="bg-muted p-2 rounded border border-border">
-                                    <div className="text-lg font-bold text-foreground">12</div>
+                                    <div className="text-lg font-bold text-foreground">
+                                        {getInvestmentsByDonor(currentUser?.id || '').length}
+                                    </div>
                                     <div className="text-[10px] text-muted-foreground uppercase">Investments</div>
                                 </div>
                                 <div className="bg-muted p-2 rounded border border-border">
-                                    <div className="text-lg font-bold text-emerald-400">${(profileData.totalInvested / 1000)}k</div>
+                                    <div className="text-lg font-bold text-emerald-400">
+                                        UGX {(currentUser?.totalInvested || 0).toLocaleString()}
+                                    </div>
                                     <div className="text-[10px] text-muted-foreground uppercase">Deployed</div>
                                 </div>
                             </div>
@@ -389,7 +660,7 @@ export const DonorDashboard: React.FC = () => {
                                                 {profileData.interests.map((tag, i) => (
                                                     <span key={i} className="px-2 py-1 bg-blue-900/30 text-blue-300 border border-blue-500/30 rounded text-xs flex items-center gap-1 animate-in zoom-in-50">
                                                         {tag}
-                                                        <button 
+                                                        <button
                                                             onClick={() => removeInterest(tag)}
                                                             className="hover:text-white ml-1 focus:outline-none"
                                                         >
@@ -397,12 +668,28 @@ export const DonorDashboard: React.FC = () => {
                                                         </button>
                                                     </span>
                                                 ))}
-                                                <button 
+                                            </div>
+                                            <div className="flex gap-2 mt-2">
+                                                <Input
+                                                    value={newInterestInput}
+                                                    onChange={(e) => setNewInterestInput(e.target.value)}
+                                                    onKeyDown={(e) => {
+                                                        if (e.key === 'Enter' && newInterestInput.trim()) {
+                                                            e.preventDefault();
+                                                            addInterest();
+                                                        }
+                                                    }}
+                                                    placeholder="Add industry focus (e.g., Education, Healthcare)"
+                                                    className="flex-1 bg-zinc-950 border-zinc-700 text-white placeholder:text-zinc-500"
+                                                />
+                                                <Button
                                                     onClick={addInterest}
-                                                    className="px-2 py-1 bg-zinc-800 text-zinc-400 border border-dashed border-zinc-600 rounded text-xs hover:text-white hover:border-zinc-400 transition-colors"
+                                                    disabled={!newInterestInput.trim()}
+                                                    variant="outline"
+                                                    className="px-4"
                                                 >
-                                                    + Add Tag
-                                                </button>
+                                                    Add
+                                                </Button>
                                             </div>
                                         </div>
                                     </>
@@ -423,40 +710,53 @@ export const DonorDashboard: React.FC = () => {
 
                         <Card title="Active Portfolio">
                             <div className="space-y-4 mt-2">
-                                {/* Mock Portfolio Items */}
-                                <div className="flex items-center justify-between p-4 bg-zinc-900/50 border border-zinc-800 rounded-lg">
-                                    <div className="flex items-center gap-3">
-                                        <div className="h-10 w-10 rounded bg-blue-900/20 text-blue-500 flex items-center justify-center font-bold">
-                                            D
-                                        </div>
-                                        <div>
-                                            <h4 className="font-semibold text-white">Decentralized Schooling</h4>
-                                            <p className="text-xs text-zinc-500">Education • Seed Round</p>
-                                        </div>
-                                    </div>
-                                    <div className="text-right">
-                                        <p className="text-sm font-bold text-white">$25,000</p>
-                                        <p className="text-xs text-emerald-400">Active</p>
-                                    </div>
-                                </div>
+                                {getInvestmentsByDonor(currentUser?.id || '').slice(0, 3).map(investment => {
+                                    const project = projects.find(p => p.id === investment.projectId);
+                                    if (!project) return null;
 
-                                <div className="flex items-center justify-between p-4 bg-zinc-900/50 border border-zinc-800 rounded-lg">
-                                    <div className="flex items-center gap-3">
-                                        <div className="h-10 w-10 rounded bg-purple-900/20 text-purple-500 flex items-center justify-center font-bold">
-                                            A
+                                    return (
+                                        <div key={investment.id} className="flex items-center justify-between p-4 bg-zinc-900/50 border border-zinc-800 rounded-lg hover:border-zinc-700 transition-colors">
+                                            <div className="flex items-center gap-3">
+                                                <div className="h-10 w-10 rounded bg-gradient-to-br from-emerald-600 to-emerald-800 flex items-center justify-center">
+                                                    <Briefcase size={18} className="text-white" />
+                                                </div>
+                                                <div>
+                                                    <h4 className="font-semibold text-white">{project.title}</h4>
+                                                    <p className="text-xs text-zinc-500">{project.category}</p>
+                                                </div>
+                                            </div>
+                                            <div className="text-right">
+                                                <p className="text-sm font-bold text-white">UGX {investment.amount.toLocaleString()}</p>
+                                                <p className="text-xs text-emerald-400">{investment.status}</p>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <h4 className="font-semibold text-white">AI Cancer Detection</h4>
-                                            <p className="text-xs text-zinc-500">Healthcare • Series A</p>
-                                        </div>
+                                    );
+                                })}
+
+                                {getInvestmentsByDonor(currentUser?.id || '').length === 0 && (
+                                    <div className="text-center py-8 text-zinc-500">
+                                        <p className="mb-3">No investments yet</p>
+                                        <Button
+                                            variant="outline"
+                                            onClick={() => setActiveTab('dashboard')}
+                                        >
+                                            Discover Projects
+                                        </Button>
                                     </div>
-                                    <div className="text-right">
-                                        <p className="text-sm font-bold text-white">$50,000</p>
-                                        <p className="text-xs text-emerald-400">Active</p>
-                                    </div>
-                                </div>
-                                
-                                <Button variant="ghost" className="w-full text-zinc-500">View All Investments</Button>
+                                )}
+
+                                {getInvestmentsByDonor(currentUser?.id || '').length > 0 && (
+                                    <Button
+                                        variant="ghost"
+                                        className="w-full text-zinc-500"
+                                        onClick={() => {
+                                            setActiveTab('dashboard');
+                                            setDashboardTab('portfolio');
+                                        }}
+                                    >
+                                        View All Investments
+                                    </Button>
+                                )}
                             </div>
                         </Card>
                     </div>
@@ -532,34 +832,52 @@ export const DonorDashboard: React.FC = () => {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-zinc-800">
-                                {[
-                                    { type: 'Sent', asset: 'USDC', amount: '25,000.00', counterparty: 'Decentralized Schooling', date: 'Oct 24, 2023', status: 'Completed' },
-                                    { type: 'Received', asset: 'TXT', amount: '500.00', counterparty: 'Staking Reward', date: 'Oct 22, 2023', status: 'Completed' },
-                                    { type: 'Sent', asset: 'ETH', amount: '2.5', counterparty: '0x82...91a', date: 'Oct 20, 2023', status: 'Pending' },
-                                    { type: 'Sent', asset: 'USDC', amount: '50,000.00', counterparty: 'AI Cancer Detection', date: 'Oct 15, 2023', status: 'Completed' },
-                                ].map((tx, i) => (
-                                    <tr key={i} className="group hover:bg-zinc-800/30 transition-colors">
-                                        <td className="py-4 pl-2">
-                                            <div className="flex items-center gap-2">
-                                                <div className={`p-1.5 rounded-full ${tx.type === 'Received' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-zinc-700/30 text-zinc-400'}`}>
-                                                    {tx.type === 'Received' ? <ArrowDownLeft size={14}/> : <ArrowUpRight size={14}/>}
+                                {getTransactionsByUser(currentUser?.id || '').slice(0, 10).map((tx) => {
+                                    const isIncoming = tx.type === 'FUND_RELEASE' || tx.type === 'DEPOSIT';
+                                    const isInvestment = tx.type === 'INVESTMENT';
+                                    const typeLabel = tx.type === 'INVESTMENT' ? 'Investment' :
+                                                     tx.type === 'FUND_RELEASE' ? 'Received' :
+                                                     tx.type === 'WITHDRAWAL' ? 'Withdrawal' :
+                                                     tx.type === 'DEPOSIT' ? 'Deposit' : 'Transfer';
+
+                                    return (
+                                        <tr key={tx.id} className="group hover:bg-zinc-800/30 transition-colors">
+                                            <td className="py-4 pl-2">
+                                                <div className="flex items-center gap-2">
+                                                    <div className={`p-1.5 rounded-full ${
+                                                        isIncoming ? 'bg-emerald-500/10 text-emerald-500' :
+                                                        isInvestment ? 'bg-blue-500/10 text-blue-500' :
+                                                        'bg-zinc-700/30 text-zinc-400'
+                                                    }`}>
+                                                        {isIncoming ? <ArrowDownLeft size={14}/> :
+                                                         isInvestment ? <TrendingUp size={14}/> :
+                                                         <ArrowUpRight size={14}/>}
+                                                    </div>
+                                                    <span className={
+                                                        isIncoming ? 'text-emerald-400' :
+                                                        isInvestment ? 'text-blue-400' :
+                                                        'text-zinc-300'
+                                                    }>
+                                                        {typeLabel}
+                                                    </span>
                                                 </div>
-                                                <span className={tx.type === 'Received' ? 'text-emerald-400' : 'text-zinc-300'}>{tx.type}</span>
-                                            </div>
-                                        </td>
-                                        <td className="py-4 font-mono text-zinc-300">{tx.asset}</td>
-                                        <td className="py-4 font-medium text-white">{tx.amount}</td>
-                                        <td className="py-4 text-zinc-400">{tx.counterparty}</td>
-                                        <td className="py-4 text-zinc-500">{tx.date}</td>
-                                        <td className="py-4 pr-2 text-right">
-                                            <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
-                                                tx.status === 'Completed' ? 'bg-emerald-950 text-emerald-500' : 'bg-amber-950 text-amber-500'
-                                            }`}>
-                                                {tx.status}
-                                            </span>
-                                        </td>
-                                    </tr>
-                                ))}
+                                            </td>
+                                            <td className="py-4 font-mono text-zinc-300">UGX</td>
+                                            <td className="py-4 font-medium text-white">{tx.amount.toLocaleString()}</td>
+                                            <td className="py-4 text-zinc-400 max-w-[200px] truncate">{tx.counterparty}</td>
+                                            <td className="py-4 text-zinc-500">{new Date(tx.date).toLocaleDateString()}</td>
+                                            <td className="py-4 pr-2 text-right">
+                                                <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
+                                                    tx.status === 'COMPLETED' ? 'bg-emerald-950 text-emerald-500' :
+                                                    tx.status === 'PROCESSING' ? 'bg-amber-950 text-amber-500' :
+                                                    'bg-zinc-800 text-zinc-400'
+                                                }`}>
+                                                    {tx.status}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
                             </tbody>
                         </table>
                     </div>
@@ -567,13 +885,209 @@ export const DonorDashboard: React.FC = () => {
              </div>
          )}
          
-         {activeTab !== 'dashboard' && activeTab !== 'profile' && activeTab !== 'wallet' && (
+         {activeTab === 'messages' && (
+             <div className="mx-auto p-8 space-y-6 animate-in fade-in">
+                <div className="pb-6 border-b border-zinc-800">
+                    <h1 className="text-3xl font-bold text-white">Messages</h1>
+                    <p className="text-zinc-400">Connect with project creators and track your conversations.</p>
+                </div>
+
+                <div className="grid grid-cols-3 gap-6 h-[calc(100vh-250px)]">
+                    {/* Conversation List */}
+                    <div className="col-span-1 bg-zinc-900 rounded-xl border border-zinc-800 overflow-hidden flex flex-col">
+                        <div className="p-4 border-b border-zinc-800">
+                            <h3 className="font-bold text-white flex items-center gap-2">
+                                <MessageCircle size={18} />
+                                Conversations
+                            </h3>
+                        </div>
+                        <div className="overflow-y-auto flex-1">
+                            {getUserConversations(currentUser?.id || '').length > 0 ? (
+                                getUserConversations(currentUser?.id || '').map(conv => {
+                                    const otherParticipantId = conv.participants.find(p => p !== currentUser?.id);
+                                    const otherParticipant = users.find(u => u.id === otherParticipantId);
+                                    const project = conv.projectId ? projects.find(p => p.id === conv.projectId) : null;
+                                    const isActive = selectedConversation === conv.id;
+
+                                    return (
+                                        <button
+                                            key={conv.id}
+                                            onClick={() => setSelectedConversation(conv.id)}
+                                            className={`w-full p-4 border-b border-zinc-800 hover:bg-zinc-800/50 transition-colors text-left ${
+                                                isActive ? 'bg-zinc-800/70' : ''
+                                            }`}
+                                        >
+                                            <div className="flex items-start gap-3">
+                                                <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold flex-shrink-0">
+                                                    {otherParticipant?.name.charAt(0) || 'U'}
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="flex items-center justify-between mb-1">
+                                                        <h4 className="font-medium text-white truncate">{otherParticipant?.name}</h4>
+                                                        {conv.lastMessage && !conv.lastMessage.read && conv.lastMessage.receiverId === currentUser?.id && (
+                                                            <span className="h-2 w-2 bg-blue-500 rounded-full flex-shrink-0"></span>
+                                                        )}
+                                                    </div>
+                                                    {project && (
+                                                        <p className="text-xs text-zinc-500 truncate mb-1">{project.title}</p>
+                                                    )}
+                                                    {conv.lastMessage && (
+                                                        <p className="text-sm text-zinc-400 truncate">{conv.lastMessage.content}</p>
+                                                    )}
+                                                    <p className="text-xs text-zinc-600 mt-1">
+                                                        {new Date(conv.lastMessageTime).toLocaleDateString()}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </button>
+                                    );
+                                })
+                            ) : (
+                                <div className="flex items-center justify-center h-full text-zinc-500 p-6">
+                                    <div className="text-center">
+                                        <MessageCircle className="mx-auto mb-3 opacity-20" size={48} />
+                                        <p className="text-sm">No conversations yet</p>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Message Thread */}
+                    <div className="col-span-2 bg-zinc-900 rounded-xl border border-zinc-800 flex flex-col">
+                        {selectedConversation ? (() => {
+                            const conversation = getUserConversations(currentUser?.id || '').find(c => c.id === selectedConversation);
+                            if (!conversation) return null;
+
+                            const otherParticipantId = conversation.participants.find(p => p !== currentUser?.id);
+                            const otherParticipant = users.find(u => u.id === otherParticipantId);
+                            const project = conversation.projectId ? projects.find(p => p.id === conversation.projectId) : null;
+                            const messages = getConversationMessages(selectedConversation);
+
+                            return (
+                                <>
+                                    {/* Message Header */}
+                                    <div className="p-4 border-b border-zinc-800">
+                                        <div className="flex items-center gap-3">
+                                            <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold">
+                                                {otherParticipant?.name.charAt(0) || 'U'}
+                                            </div>
+                                            <div>
+                                                <h3 className="font-bold text-white">{otherParticipant?.name}</h3>
+                                                {project && (
+                                                    <p className="text-xs text-zinc-500">
+                                                        Re: {project.title}
+                                                    </p>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Message List */}
+                                    <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                                        {messages.length > 0 ? (
+                                            messages.map(msg => {
+                                                const isCurrentUser = msg.senderId === currentUser?.id;
+                                                return (
+                                                    <div
+                                                        key={msg.id}
+                                                        className={`flex ${isCurrentUser ? 'justify-end' : 'justify-start'}`}
+                                                    >
+                                                        <div className={`max-w-[70%] ${
+                                                            isCurrentUser ? 'order-2' : 'order-1'
+                                                        }`}>
+                                                            <div className={`p-3 rounded-lg ${
+                                                                isCurrentUser
+                                                                    ? 'bg-blue-600 text-white'
+                                                                    : 'bg-zinc-800 text-zinc-100'
+                                                            }`}>
+                                                                <p className="text-sm">{msg.content}</p>
+                                                            </div>
+                                                            <div className={`flex items-center gap-2 mt-1 text-xs text-zinc-500 ${
+                                                                isCurrentUser ? 'justify-end' : 'justify-start'
+                                                            }`}>
+                                                                <Clock size={12} />
+                                                                <span>{new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })
+                                        ) : (
+                                            <div className="flex items-center justify-center h-full text-zinc-500">
+                                                <p className="text-sm">No messages yet. Start the conversation!</p>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Message Input */}
+                                    <div className="p-4 border-t border-zinc-800">
+                                        <div className="flex gap-3">
+                                            <Input
+                                                value={newMessage}
+                                                onChange={(e) => setNewMessage(e.target.value)}
+                                                onKeyDown={(e) => {
+                                                    if (e.key === 'Enter' && !e.shiftKey && newMessage.trim() && otherParticipantId) {
+                                                        e.preventDefault();
+                                                        sendMessage(otherParticipantId, newMessage.trim(), conversation.projectId);
+                                                        setNewMessage('');
+                                                        toast.success('Message sent!');
+                                                    }
+                                                }}
+                                                placeholder="Type your message..."
+                                                className="flex-1 bg-zinc-950 border-zinc-700 text-white placeholder:text-zinc-500"
+                                            />
+                                            <Button
+                                                onClick={() => {
+                                                    if (newMessage.trim() && otherParticipantId) {
+                                                        sendMessage(otherParticipantId, newMessage.trim(), conversation.projectId);
+                                                        setNewMessage('');
+                                                        toast.success('Message sent!');
+                                                    }
+                                                }}
+                                                disabled={!newMessage.trim()}
+                                                className="bg-blue-600 hover:bg-blue-700 text-white border-0"
+                                            >
+                                                <Send size={18} />
+                                            </Button>
+                                        </div>
+                                    </div>
+                                </>
+                            );
+                        })() : (
+                            <div className="flex items-center justify-center h-full text-zinc-500">
+                                <div className="text-center">
+                                    <MessageCircle className="mx-auto mb-3 opacity-20" size={64} />
+                                    <p>Select a conversation to start messaging</p>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
+         )}
+
+         {activeTab !== 'dashboard' && activeTab !== 'profile' && activeTab !== 'wallet' && activeTab !== 'messages' && (
              <div className="flex items-center justify-center h-full text-zinc-500 bg-zinc-950/20">
                  <div className="text-center">
                     <Building2 className="mx-auto mb-4 opacity-20" size={48} />
                     <p>Module under development.</p>
                  </div>
              </div>
+         )}
+
+         {/* Investment Modal */}
+         {showInvestmentModal && investingProject && (
+           <InvestmentModal
+             isOpen={showInvestmentModal}
+             onClose={() => {
+               setShowInvestmentModal(false);
+               setInvestingProject(null);
+             }}
+             project={investingProject}
+             currentBalance={currentUser?.balance || 0}
+             onInvest={createInvestment}
+           />
          )}
       </div>
       </div>

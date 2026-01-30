@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { User, Project, UserRole, MilestoneStatus, Transaction, TransactionType, TransactionStatus, Investment, PaymentMethod, WithdrawalRequest, ConnectionRequest, ConnectionStatus } from './types';
-import { MOCK_USERS, MOCK_PROJECTS, MOCK_TRANSACTIONS, MOCK_INVESTMENTS, MOCK_PAYMENT_METHODS } from './constants';
+import { User, Project, UserRole, MilestoneStatus, Transaction, TransactionType, TransactionStatus, Investment, PaymentMethod, WithdrawalRequest, ConnectionRequest, ConnectionStatus, Message, Conversation } from './types';
+import { MOCK_USERS, MOCK_PROJECTS, MOCK_TRANSACTIONS, MOCK_INVESTMENTS, MOCK_PAYMENT_METHODS, MOCK_MESSAGES, MOCK_CONVERSATIONS } from './constants';
 
 interface AppContextType {
   currentUser: User | null;
@@ -15,11 +15,13 @@ interface AppContextType {
   login: (role: UserRole) => void;
   logout: () => void;
   addProject: (project: Project) => void;
+  updateProject: (projectId: string, updates: Partial<Project>) => void;
   updateMilestoneStatus: (projectId: string, milestoneId: string, status: MilestoneStatus, proofUrl?: string) => Promise<void>;
   simulateReleaseFunds: (projectId: string, milestoneId: string) => Promise<boolean>;
   updateUserProfile: (userId: string, updates: Partial<User>) => void;
   getTransactionsByUser: (userId: string) => Transaction[];
   getInvestmentsByDonor: (donorId: string) => Investment[];
+  createInvestment: (projectId: string, amount: number) => Promise<boolean>;
 
   // Payment methods
   addPaymentMethod: (method: Omit<PaymentMethod, 'id' | 'createdAt'>) => void;
@@ -34,6 +36,13 @@ interface AppContextType {
   // Connections
   sendConnectionRequest: (donorId: string, message?: string) => void;
   getConnectionStatus: (creatorId: string, donorId: string) => ConnectionStatus;
+
+  // Messaging
+  messages: Message[];
+  conversations: Conversation[];
+  sendMessage: (receiverId: string, content: string, projectId?: string) => void;
+  getConversationMessages: (conversationId: string) => Message[];
+  getUserConversations: (userId: string) => Conversation[];
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -47,6 +56,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>(MOCK_PAYMENT_METHODS);
   const [withdrawalRequests, setWithdrawalRequests] = useState<WithdrawalRequest[]>([]);
   const [connectionRequests, setConnectionRequests] = useState<ConnectionRequest[]>([]);
+  const [conversations, setConversations] = useState<Conversation[]>(MOCK_CONVERSATIONS);
+  const [messages, setMessages] = useState<Message[]>(MOCK_MESSAGES);
 
   const login = (role: UserRole) => {
     const user = users.find(u => u.role === role);
@@ -59,6 +70,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const addProject = (project: Project) => {
     setProjects(prev => [...prev, project]);
+  };
+
+  const updateProject = (projectId: string, updates: Partial<Project>) => {
+    setProjects(prevProjects => prevProjects.map(p => 
+      p.id === projectId ? { ...p, ...updates } : p
+    ));
   };
 
   // Simulate Web3 Interaction: Update blockchain state (mock)
@@ -88,15 +105,26 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const creator = users.find(u => u.id === project.creatorId);
     if (!creator) return false;
 
-    // 1. Update project funding
+    // Find the index of the current milestone to unlock the next one
+    const milestoneIndex = project.milestones.findIndex(m => m.id === milestoneId);
+
+    // 1. Update project funding and unlock next milestone
     setProjects(prevProjects => prevProjects.map(p => {
       if (p.id !== projectId) return p;
       return {
         ...p,
         currentFunding: p.currentFunding + milestone.amount,
-        milestones: p.milestones.map(m =>
-          m.id === milestoneId ? { ...m, status: MilestoneStatus.APPROVED } : m
-        )
+        milestones: p.milestones.map((m, idx) => {
+          // Approve the current milestone
+          if (m.id === milestoneId) {
+            return { ...m, status: MilestoneStatus.APPROVED };
+          }
+          // Unlock the next milestone (if it exists and is currently locked)
+          if (idx === milestoneIndex + 1 && m.status === MilestoneStatus.LOCKED) {
+            return { ...m, status: MilestoneStatus.PENDING_SUBMISSION };
+          }
+          return m;
+        })
       };
     }));
 
@@ -149,6 +177,71 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const getInvestmentsByDonor = (donorId: string) => {
     return investments.filter(inv => inv.donorId === donorId);
+  };
+
+  // Investment Management
+  const createInvestment = async (projectId: string, amount: number): Promise<boolean> => {
+    if (!currentUser || amount <= 0 || amount > currentUser.balance) {
+      return false;
+    }
+
+    await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate blockchain transaction
+
+    // 1. Create investment record
+    const newInvestment: Investment = {
+      id: `inv${Date.now()}`,
+      donorId: currentUser.id,
+      projectId,
+      amount,
+      date: new Date().toISOString(),
+      status: 'active'
+    };
+    setInvestments(prev => [...prev, newInvestment]);
+
+    // 2. Create transaction
+    const project = projects.find(p => p.id === projectId);
+    const newTransaction: Transaction = {
+      id: `tx${Date.now()}`,
+      userId: currentUser.id,
+      type: TransactionType.INVESTMENT,
+      amount,
+      projectId,
+      date: new Date().toISOString(),
+      status: TransactionStatus.COMPLETED,
+      txHash: `0x${Math.random().toString(16).substr(2, 40)}`,
+      counterparty: project?.title || 'Project',
+      description: `Investment in ${project?.title}`
+    };
+    setTransactions(prev => [newTransaction, ...prev]);
+
+    // 3. Deduct balance and update user stats
+    setUsers(prevUsers => prevUsers.map(u =>
+      u.id === currentUser.id
+        ? {
+            ...u,
+            balance: u.balance - amount,
+            totalInvested: (u.totalInvested || 0) + amount,
+            activeInvestments: (u.activeInvestments || 0) + 1
+          }
+        : u
+    ));
+
+    // 4. Update currentUser state
+    setCurrentUser(prev => prev ? {
+      ...prev,
+      balance: prev.balance - amount,
+      totalInvested: (prev.totalInvested || 0) + amount,
+      activeInvestments: (prev.activeInvestments || 0) + 1
+    } : null);
+
+    // 5. Update project funding
+    setProjects(prevProjects => prevProjects.map(p =>
+      p.id === projectId
+        ? { ...p, currentFunding: p.currentFunding + amount }
+        : p
+    ));
+
+    return true;
   };
 
   // Payment Method Management
@@ -307,6 +400,62 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return connection?.status || ConnectionStatus.NONE;
   };
 
+  // Messaging Management
+  const sendMessage = (receiverId: string, content: string, projectId?: string) => {
+    if (!currentUser) return;
+
+    // Find or create conversation
+    let conversation = conversations.find(c =>
+      c.participants.includes(currentUser.id) && c.participants.includes(receiverId)
+    );
+
+    if (!conversation) {
+      conversation = {
+        id: `conv${Date.now()}`,
+        participants: [currentUser.id, receiverId],
+        projectId,
+        lastMessageTime: new Date().toISOString()
+      };
+      setConversations(prev => [...prev, conversation!]);
+    }
+
+    const newMessage: Message = {
+      id: `msg${Date.now()}`,
+      senderId: currentUser.id,
+      receiverId,
+      content,
+      timestamp: new Date().toISOString(),
+      read: false
+    };
+
+    setMessages(prev => [...prev, newMessage]);
+
+    // Update conversation last message time
+    setConversations(prev => prev.map(c =>
+      c.id === conversation!.id
+        ? { ...c, lastMessage: newMessage, lastMessageTime: newMessage.timestamp }
+        : c
+    ));
+  };
+
+  const getConversationMessages = (conversationId: string) => {
+    const conversation = conversations.find(c => c.id === conversationId);
+    if (!conversation) return [];
+
+    return messages
+      .filter(m =>
+        (m.senderId === conversation.participants[0] && m.receiverId === conversation.participants[1]) ||
+        (m.senderId === conversation.participants[1] && m.receiverId === conversation.participants[0])
+      )
+      .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+  };
+
+  const getUserConversations = (userId: string) => {
+    return conversations
+      .filter(c => c.participants.includes(userId))
+      .sort((a, b) => new Date(b.lastMessageTime).getTime() - new Date(a.lastMessageTime).getTime());
+  };
+
   return (
     <AppContext.Provider value={{
       currentUser,
@@ -317,14 +466,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       paymentMethods,
       withdrawalRequests,
       connectionRequests,
+      messages,
+      conversations,
       login,
       logout,
       addProject,
+      updateProject,
       updateMilestoneStatus,
       simulateReleaseFunds,
       updateUserProfile,
       getTransactionsByUser,
       getInvestmentsByDonor,
+      createInvestment,
       addPaymentMethod,
       updatePaymentMethod,
       deletePaymentMethod,
@@ -332,7 +485,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       getPaymentMethodsByUser,
       initiateWithdrawal,
       sendConnectionRequest,
-      getConnectionStatus
+      getConnectionStatus,
+      sendMessage,
+      getConversationMessages,
+      getUserConversations
     }}>
       {children}
     </AppContext.Provider>

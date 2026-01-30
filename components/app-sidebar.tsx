@@ -55,16 +55,18 @@ import {
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
   activeTab: string
   setActiveTab: (tab: string) => void
+  onProjectSelect?: (projectId: string) => void
 }
 
-export function AppSidebar({ activeTab, setActiveTab, ...props }: AppSidebarProps) {
-  const { currentUser, logout, projects } = useApp()
+export function AppSidebar({ activeTab, setActiveTab, onProjectSelect, ...props }: AppSidebarProps) {
+  const { currentUser, logout, projects, getInvestmentsByDonor } = useApp()
   const { theme, setTheme } = useTheme()
   const isCreator = currentUser?.role === UserRole.CREATOR
 
-  // Get user's projects
+  // Get user's projects - for creators get their own projects, for donors get invested projects
+  const investedProjectIds = !isCreator && currentUser ? getInvestmentsByDonor(currentUser.id).map(inv => inv.projectId) : [];
   const myProjects = projects.filter(p => 
-    isCreator ? p.creatorId === currentUser?.id : true
+    isCreator ? p.creatorId === currentUser?.id : investedProjectIds.includes(p.id)
   ).slice(0, 5)
 
   const creatorNavigation = [
@@ -91,11 +93,6 @@ export function AppSidebar({ activeTab, setActiveTab, ...props }: AppSidebarProp
       title: "Discover",
       icon: Search,
       id: "dashboard",
-    },
-    {
-      title: "Investments",
-      icon: TrendingUp,
-      id: "investments",
     },
     {
       title: "Messages",
@@ -169,7 +166,10 @@ export function AppSidebar({ activeTab, setActiveTab, ...props }: AppSidebarProp
                 myProjects.map((project) => (
                   <SidebarMenuItem key={project.id}>
                     <SidebarMenuButton
-                      onClick={() => setActiveTab('dashboard')}
+                      onClick={() => {
+                        setActiveTab('dashboard');
+                        onProjectSelect?.(project.id);
+                      }}
                       tooltip={project.title}
                     >
                       <FolderOpen className="size-4" />
@@ -181,10 +181,10 @@ export function AppSidebar({ activeTab, setActiveTab, ...props }: AppSidebarProp
                 <SidebarMenuItem>
                   <SidebarMenuButton
                     onClick={() => setActiveTab('dashboard')}
-                    tooltip="Create new project"
+                    tooltip={isCreator ? "Create new project" : "Discover projects"}
                   >
                     <Plus className="size-4" />
-                    <span>Create Project</span>
+                    <span>{isCreator ? "Create Project" : "Discover Projects"}</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               )}
