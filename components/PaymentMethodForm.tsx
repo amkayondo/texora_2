@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { PaymentMethodType, MobileMoneyProvider, UgandanBank } from '../types';
-import { Button } from './Button';
-import { Input } from './Input';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 
 interface PaymentMethodFormProps {
   onSubmit: (method: {

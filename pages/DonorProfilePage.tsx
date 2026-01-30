@@ -1,8 +1,8 @@
 import React from 'react';
 import { ArrowLeft, MapPin, CheckCircle, Mail, Globe, Linkedin, DollarSign, TrendingUp, Briefcase } from 'lucide-react';
 import { useApp } from '../AppContext';
-import { Card } from '../components/Card';
-import { Button } from '../components/Button';
+import { Card } from '@/components/Card';
+import { Button } from '@/components/ui/button';
 import { Web3Badge } from '../components/Web3Badge';
 
 interface DonorProfilePageProps {
@@ -35,7 +35,7 @@ export const DonorProfilePage: React.FC<DonorProfilePageProps> = ({ donorId, onB
   const avgTicket = activeInvestmentsCount > 0 ? totalInvestedCalculated / activeInvestmentsCount : 0;
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white p-8">
+    <div className="min-h-screen bg-background text-foreground p-8">
       {/* Header with Back Button */}
       <div className="mb-6">
         <Button variant="ghost" onClick={onBack}>
@@ -49,13 +49,13 @@ export const DonorProfilePage: React.FC<DonorProfilePageProps> = ({ donorId, onB
         <div className="flex items-start gap-6">
           {/* Avatar */}
           <div className="h-24 w-24 rounded-full bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center flex-shrink-0">
-            <span className="text-4xl font-bold text-white">{donor.name.charAt(0)}</span>
+            <span className="text-4xl font-bold text-primary-foreground">{donor.name.charAt(0)}</span>
           </div>
 
           {/* Info */}
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-2">
-              <h1 className="text-3xl font-bold text-white">{donor.name}</h1>
+              <h1 className="text-3xl font-bold text-foreground">{donor.name}</h1>
               {donor.verified && (
                 <CheckCircle size={24} className="text-emerald-500" />
               )}
@@ -123,7 +123,7 @@ export const DonorProfilePage: React.FC<DonorProfilePageProps> = ({ donorId, onB
             </div>
             <div>
               <p className="text-sm text-zinc-400">Total Invested</p>
-              <p className="text-2xl font-bold text-white">
+              <p className="text-2xl font-bold text-foreground">
                 ${(donor.totalInvested || totalInvestedCalculated).toLocaleString()}
               </p>
             </div>
@@ -137,7 +137,7 @@ export const DonorProfilePage: React.FC<DonorProfilePageProps> = ({ donorId, onB
             </div>
             <div>
               <p className="text-sm text-zinc-400">Active Investments</p>
-              <p className="text-2xl font-bold text-white">
+              <p className="text-2xl font-bold text-foreground">
                 {donor.activeInvestments || activeInvestmentsCount}
               </p>
             </div>
@@ -151,7 +151,7 @@ export const DonorProfilePage: React.FC<DonorProfilePageProps> = ({ donorId, onB
             </div>
             <div>
               <p className="text-sm text-zinc-400">Ticket Size</p>
-              <p className="text-xl font-bold text-white">
+              <p className="text-xl font-bold text-foreground">
                 {donor.ticketSize || `$${Math.round(avgTicket / 1000)}k avg`}
               </p>
             </div>
@@ -166,7 +166,7 @@ export const DonorProfilePage: React.FC<DonorProfilePageProps> = ({ donorId, onB
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b border-zinc-800">
+                  <tr className="border-b border-border">
                     <th className="text-left py-3 px-4 text-sm font-medium text-zinc-400">Project</th>
                     <th className="text-left py-3 px-4 text-sm font-medium text-zinc-400">Amount</th>
                     <th className="text-left py-3 px-4 text-sm font-medium text-zinc-400">Date</th>
@@ -177,10 +177,10 @@ export const DonorProfilePage: React.FC<DonorProfilePageProps> = ({ donorId, onB
                   {investments.map((investment) => {
                     const project = projects.find(p => p.id === investment.projectId);
                     return (
-                      <tr key={investment.id} className="border-b border-zinc-800 hover:bg-zinc-900/50">
+                      <tr key={investment.id} className="border-b border-border hover:bg-muted/50">
                         <td className="py-4 px-4">
                           <div>
-                            <p className="font-medium text-white">
+                            <p className="font-medium text-foreground">
                               {project?.title || 'Unknown Project'}
                             </p>
                             <p className="text-sm text-zinc-500">{project?.category}</p>
@@ -221,7 +221,7 @@ export const DonorProfilePage: React.FC<DonorProfilePageProps> = ({ donorId, onB
           <p className="text-zinc-300 whitespace-pre-wrap">{donor.bio}</p>
 
           {donor.joinedDate && (
-            <div className="mt-4 pt-4 border-t border-zinc-800">
+            <div className="mt-4 pt-4 border-t border-border">
               <p className="text-sm text-zinc-500">
                 Member since {new Date(donor.joinedDate).toLocaleDateString('en-US', {
                   year: 'numeric',
@@ -237,14 +237,14 @@ export const DonorProfilePage: React.FC<DonorProfilePageProps> = ({ donorId, onB
             {donor.investmentStage && (
               <div>
                 <p className="text-sm text-zinc-400 mb-1">Investment Stage</p>
-                <p className="text-white font-medium">{donor.investmentStage}</p>
+                <p className="text-foreground font-medium">{donor.investmentStage}</p>
               </div>
             )}
 
             {donor.ticketSize && (
               <div>
                 <p className="text-sm text-zinc-400 mb-1">Typical Ticket Size</p>
-                <p className="text-white font-medium">{donor.ticketSize}</p>
+                <p className="text-foreground font-medium">{donor.ticketSize}</p>
               </div>
             )}
 
@@ -265,7 +265,7 @@ export const DonorProfilePage: React.FC<DonorProfilePageProps> = ({ donorId, onB
       {/* Action Button */}
       <div className="mt-8 flex justify-center">
         <Button
-          className="bg-indigo-600 hover:bg-indigo-700 text-white border-0 px-8"
+          className="bg-primary hover:bg-primary/90 text-primary-foreground border-0 px-8"
           onClick={() => alert('Messaging feature coming soon! This would open a message dialog.')}
         >
           <Mail size={18} className="mr-2" />

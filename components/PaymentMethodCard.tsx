@@ -1,7 +1,7 @@
 import React from 'react';
 import { Building2, Smartphone, Check, Trash2 } from 'lucide-react';
 import { PaymentMethod, PaymentMethodType } from '../types';
-import { Button } from './Button';
+import { Button } from '@/components/ui/button';
 
 interface PaymentMethodCardProps {
   method: PaymentMethod;

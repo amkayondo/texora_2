@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Milestone, MilestoneStatus, UserRole } from '../types';
 import { useApp } from '../AppContext';
-import { Button } from './Button';
+import { Button } from '@/components/ui/button';
 import { CheckCircle, Clock, FileText, Lock, Upload, AlertCircle, Loader2 } from 'lucide-react';
 import { Web3Badge } from './Web3Badge';
 import { generateMilestoneReportSummary } from '../services/geminiService';

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../AppContext';
 import { UserRole } from '../types';
-import { Button } from '../components/Button';
-import { Input } from '../components/Input';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Briefcase, User, ArrowRight, ShieldCheck, AlertTriangle, Fingerprint, Loader2, CheckCircle2 } from 'lucide-react';
 
 export const AuthPage: React.FC = () => {
@@ -74,11 +74,11 @@ export const AuthPage: React.FC = () => {
       ];
 
       return (
-        <div className="h-screen w-screen bg-black flex flex-col items-center justify-center">
+        <div className="h-screen w-screen bg-background flex flex-col items-center justify-center">
           <div className="w-full max-w-xs space-y-8">
             {/* Logo */}
             <div className="flex items-center justify-center mb-12">
-              <span className="text-2xl font-semibold text-white">Texora</span>
+              <span className="text-2xl font-semibold text-foreground">Texora</span>
             </div>
 
             {/* Steps */}
@@ -87,15 +87,15 @@ export const AuthPage: React.FC = () => {
                 <div key={s.id} className="flex items-center gap-3">
                   <div className={`h-5 w-5 rounded-full flex items-center justify-center transition-all duration-300 ${
                     connectionStep >= s.id 
-                      ? 'bg-white' 
-                      : 'border border-zinc-700'
+                      ? 'bg-primary' 
+                      : 'border border-border'
                   }`}>
                     {connectionStep >= s.id && (
-                      <CheckCircle2 size={14} className="text-black" />
+                      <CheckCircle2 size={14} className="text-primary-foreground" />
                     )}
                   </div>
                   <span className={`text-sm transition-colors duration-300 ${
-                    connectionStep >= s.id ? 'text-white' : 'text-zinc-600'
+                    connectionStep >= s.id ? 'text-foreground' : 'text-muted-foreground'
                   }`}>
                     {s.label}
                   </span>
@@ -118,10 +118,10 @@ export const AuthPage: React.FC = () => {
       ];
 
       return (
-          <div className="h-screen w-screen bg-black flex flex-col items-center justify-center">
+          <div className="h-screen w-screen bg-background flex flex-col items-center justify-center">
               <div className="w-full max-w-xs space-y-8">
                   <div className="text-center mb-12">
-                      <span className="text-2xl font-semibold text-white">Texora</span>
+                      <span className="text-2xl font-semibold text-foreground">Texora</span>
                   </div>
 
                   <div className="space-y-4">
@@ -129,15 +129,15 @@ export const AuthPage: React.FC = () => {
                         <div key={s.id} className="flex items-center gap-3">
                           <div className={`h-5 w-5 rounded-full flex items-center justify-center transition-all duration-300 ${
                             verificationProgress > s.threshold 
-                              ? 'bg-white' 
-                              : 'border border-zinc-700'
+                              ? 'bg-primary' 
+                              : 'border border-border'
                           }`}>
                             {verificationProgress > s.threshold && (
-                              <CheckCircle2 size={14} className="text-black" />
+                              <CheckCircle2 size={14} className="text-primary-foreground" />
                             )}
                           </div>
                           <span className={`text-sm transition-colors duration-300 ${
-                            verificationProgress > s.threshold ? 'text-white' : 'text-zinc-600'
+                            verificationProgress > s.threshold ? 'text-foreground' : 'text-muted-foreground'
                           }`}>
                             {s.label}
                           </span>
@@ -155,19 +155,19 @@ export const AuthPage: React.FC = () => {
   return (
     <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2">
       {/* Left: Hero & Branding */}
-      <div className="relative hidden lg:flex flex-col justify-between p-12 bg-zinc-950 border-r border-zinc-800 overflow-hidden">
+      <div className="relative hidden lg:flex flex-col justify-between p-12 bg-card border-r border-border overflow-hidden">
         {/* Updated Image to Gradient */}
         <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop')] bg-cover bg-center opacity-30 mix-blend-overlay"></div>
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-zinc-950"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-card"></div>
         
         <div className="relative z-10">
           <div className="mb-8">
-             <span className="text-2xl font-bold tracking-tight text-white">Texora</span>
+             <span className="text-2xl font-bold tracking-tight text-foreground">Texora</span>
           </div>
-          <h1 className="text-5xl font-extrabold tracking-tight text-white leading-tight mb-6">
+          <h1 className="text-5xl font-extrabold tracking-tight text-foreground leading-tight mb-6">
             Fund Ideas. <br/> <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">Build Trust.</span>
           </h1>
-          <p className="text-xl text-zinc-400 max-w-lg mb-8">
+          <p className="text-xl text-muted-foreground max-w-lg mb-8">
             Connect with donors, get matched by AI, and bring your projects to life with milestone-based funding.
           </p>
           <div className="space-y-3 text-zinc-500">
@@ -193,11 +193,11 @@ export const AuthPage: React.FC = () => {
       </div>
 
       {/* Right: Login Form */}
-      <div className="flex items-center justify-center p-8 bg-black relative">
+      <div className="flex items-center justify-center p-8 bg-background relative">
         <div className="w-full max-w-md space-y-8 relative z-10">
           <div className="text-center lg:text-left">
-            <h2 className="text-3xl font-bold tracking-tight text-white">Access Texora</h2>
-            <p className="mt-2 text-zinc-400">Continue as a creator or investor.</p>
+            <h2 className="text-3xl font-bold tracking-tight text-foreground">Access Texora</h2>
+            <p className="mt-2 text-muted-foreground">Continue as a creator or investor.</p>
           </div>
 
           <div className="space-y-6">
@@ -205,32 +205,32 @@ export const AuthPage: React.FC = () => {
                <div className="grid grid-cols-1 gap-4">
                   <button 
                     onClick={() => setDemo(UserRole.CREATOR)}
-                    className="flex items-center p-4 border border-zinc-800 rounded-xl hover:bg-zinc-900 hover:border-blue-500/50 transition-all group text-left relative overflow-hidden"
+                    className="flex items-center p-4 border border-border rounded-xl hover:bg-muted hover:border-blue-500/50 transition-all group text-left relative overflow-hidden"
                   >
                      <div className="absolute inset-0 bg-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                     <div className="h-12 w-12 rounded-full bg-blue-500/10 text-blue-500 flex items-center justify-center mr-4 group-hover:bg-blue-500 group-hover:text-white transition-colors">
+                     <div className="h-12 w-12 rounded-full bg-blue-500/10 text-blue-500 flex items-center justify-center mr-4 group-hover:bg-blue-500 group-hover:text-primary-foreground transition-colors">
                         <Briefcase size={24} />
                      </div>
                      <div>
-                        <h3 className="font-semibold text-white">Continue as Creator</h3>
-                        <p className="text-xs text-zinc-500">Launch projects & receive funding</p>
+                        <h3 className="font-semibold text-foreground">Continue as Creator</h3>
+                        <p className="text-xs text-muted-foreground">Launch projects & receive funding</p>
                      </div>
-                     <ArrowRight className="ml-auto text-zinc-600 group-hover:text-white" size={20} />
+                     <ArrowRight className="ml-auto text-muted-foreground group-hover:text-foreground" size={20} />
                   </button>
 
                   <button 
                     onClick={() => setDemo(UserRole.DONOR)}
-                    className="flex items-center p-4 border border-zinc-800 rounded-xl hover:bg-zinc-900 hover:border-emerald-500/50 transition-all group text-left relative overflow-hidden"
+                    className="flex items-center p-4 border border-border rounded-xl hover:bg-muted hover:border-emerald-500/50 transition-all group text-left relative overflow-hidden"
                   >
                      <div className="absolute inset-0 bg-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                     <div className="h-12 w-12 rounded-full bg-emerald-500/10 text-emerald-500 flex items-center justify-center mr-4 group-hover:bg-emerald-500 group-hover:text-white transition-colors">
+                     <div className="h-12 w-12 rounded-full bg-emerald-500/10 text-emerald-500 flex items-center justify-center mr-4 group-hover:bg-emerald-500 group-hover:text-primary-foreground transition-colors">
                         <User size={24} />
                      </div>
                      <div>
-                        <h3 className="font-semibold text-white">Continue as Investor</h3>
-                        <p className="text-xs text-zinc-500">Fund projects & track progress</p>
+                        <h3 className="font-semibold text-foreground">Continue as Investor</h3>
+                        <p className="text-xs text-muted-foreground">Fund projects & track progress</p>
                      </div>
-                     <ArrowRight className="ml-auto text-zinc-600 group-hover:text-white" size={20} />
+                     <ArrowRight className="ml-auto text-muted-foreground group-hover:text-foreground" size={20} />
                   </button>
                </div>
              ) : (
@@ -238,12 +238,12 @@ export const AuthPage: React.FC = () => {
                   <div className="space-y-4">
                     <button 
                       onClick={() => setRole(null)}
-                      className="text-sm text-zinc-500 hover:text-white transition-colors flex items-center gap-1"
+                      className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
                     >
                       ← Back
                     </button>
 
-                    <div className="bg-zinc-900/50 p-4 rounded-lg border border-zinc-800 mb-6">
+                    <div className="bg-muted/50 p-4 rounded-lg border border-border mb-6">
                         <p className="text-xs text-zinc-500 uppercase font-bold mb-2">Demo Credentials Auto-Filled</p>
                         <div className="flex justify-between items-center text-sm text-zinc-300 font-mono">
                             <span>{email}</span>
@@ -264,7 +264,7 @@ export const AuthPage: React.FC = () => {
                         onChange={(e) => setPassword(e.target.value)} 
                     />
                     
-                    <Button className="w-full h-12 text-base bg-blue-600 hover:bg-blue-700 text-white border-0 shadow-lg shadow-blue-900/20" onClick={handleLogin}>
+                    <Button className="w-full h-12 text-base bg-primary hover:bg-primary/90 text-primary-foreground border-0 shadow-lg shadow-primary/20" onClick={handleLogin}>
                        Login
                     </Button>
                     
@@ -276,8 +276,8 @@ export const AuthPage: React.FC = () => {
              )}
           </div>
           
-          <div className="border-t border-zinc-800 pt-6 mt-8">
-              <div className="flex items-center justify-between text-xs text-zinc-500">
+          <div className="border-t border-border pt-6 mt-8">
+              <div className="flex items-center justify-between text-xs text-muted-foreground">
                   <span className="flex items-center gap-1"><ShieldCheck size={12}/> Secure Connection</span>
                   <span>Texora Protocol v1.0.4</span>
               </div>

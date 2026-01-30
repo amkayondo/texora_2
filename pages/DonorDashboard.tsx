@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../AppContext';
-import { Card } from '../components/Card';
-import { Button } from '../components/Button';
-import { Input } from '../components/Input';
+import { Card } from '@/components/Card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { MilestoneTracker } from '../components/MilestoneTracker';
 import { AppSidebar } from '@/components/app-sidebar';
 import { SidebarProvider } from '@/components/ui/sidebar';
@@ -76,28 +76,28 @@ export const DonorDashboard: React.FC = () => {
 
   return (
     <SidebarProvider>
-      <div className="flex min-h-[calc(100vh-64px)] bg-black w-full">
+      <div className="flex min-h-screen bg-background w-full">
         <AppSidebar activeTab={activeTab} setActiveTab={setActiveTab} />
       
-      <div className="flex-1 overflow-y-auto h-[calc(100vh-64px)]">
+      <div className="flex-1 overflow-y-auto h-screen">
          {activeTab === 'dashboard' && (
              <div className="max-w-7xl mx-auto p-8 space-y-8">
                 {/* Header Section */}
-                <div className="flex flex-col md:flex-row justify-between items-end gap-4 border-b border-zinc-800 pb-6">
+                <div className="flex flex-col md:flex-row justify-between items-end gap-4 border-b border-border pb-6">
                     <div>
-                        <h1 className="text-3xl font-bold tracking-tight text-white mb-2">Investor Terminal</h1>
-                        <p className="text-zinc-400">Manage your capital allocation and discover opportunities.</p>
+                        <h1 className="text-3xl font-bold tracking-tight text-foreground mb-2">Investor Terminal</h1>
+                        <p className="text-muted-foreground">Manage your capital allocation and discover opportunities.</p>
                     </div>
-                    <div className="flex bg-zinc-900 p-1 rounded-lg border border-zinc-800">
+                    <div className="flex bg-muted p-1 rounded-lg border border-border">
                         <button 
                            onClick={() => setDashboardTab('discover')}
-                           className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${dashboardTab === 'discover' ? 'bg-zinc-800 text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-300'}`}
+                           className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${dashboardTab === 'discover' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
                         >
                            Discover
                         </button>
                         <button 
                            onClick={() => setDashboardTab('portfolio')}
-                           className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${dashboardTab === 'portfolio' ? 'bg-zinc-800 text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-300'}`}
+                           className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${dashboardTab === 'portfolio' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
                         >
                            My Portfolio
                         </button>
@@ -106,7 +106,7 @@ export const DonorDashboard: React.FC = () => {
 
                 {selectedProject ? (
                   <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                     <Button variant="ghost" onClick={() => setSelectedProject(null)} className="mb-4 pl-0 hover:pl-2 transition-all text-zinc-400 hover:text-white">
+                     <Button variant="ghost" onClick={() => setSelectedProject(null)} className="mb-4 pl-0 hover:pl-2 transition-all text-muted-foreground hover:text-foreground">
                          &larr; Back to Listings
                      </Button>
                      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -124,7 +124,7 @@ export const DonorDashboard: React.FC = () => {
                                  <p className="text-zinc-300 leading-relaxed text-lg">{selectedProject.description}</p>
                               </div>
 
-                              <div className="pt-6 border-t border-zinc-800">
+                              <div className="pt-6 border-t border-border">
                                   <h3 className="text-xl font-semibold mb-4">Milestone Verification</h3>
                                   <MilestoneTracker 
                                      projectId={selectedProject.id}
@@ -150,7 +150,7 @@ export const DonorDashboard: React.FC = () => {
                                      </div>
                                      <div className="flex justify-between mt-4">
                                          <div className="text-center">
-                                             <p className="text-2xl font-bold text-white">${selectedProject.currentFunding.toLocaleString()}</p>
+                                             <p className="text-2xl font-bold text-foreground">${selectedProject.currentFunding.toLocaleString()}</p>
                                              <p className="text-xs text-zinc-500 uppercase">Raised</p>
                                          </div>
                                          <div className="text-center">
@@ -159,7 +159,7 @@ export const DonorDashboard: React.FC = () => {
                                          </div>
                                      </div>
                                  </div>
-                                 <div className="bg-zinc-950 p-4 rounded-lg border border-zinc-800 mb-4">
+                                 <div className="bg-muted p-4 rounded-lg border border-border mb-4">
                                       <div className="flex items-center gap-2 mb-2 text-emerald-400">
                                           <Sparkles size={16} />
                                           <span className="text-xs font-bold uppercase">AI Insight</span>
@@ -168,7 +168,7 @@ export const DonorDashboard: React.FC = () => {
                                          "{aiMatches[selectedProject.id]?.reason || "Calculating compatibility..."}"
                                       </p>
                                  </div>
-                                 <Button className="w-full bg-emerald-600 hover:bg-emerald-700 text-white border-0" size="lg">Fund Project</Button>
+                                 <Button className="w-full bg-emerald-600 hover:bg-emerald-700 text-primary-foreground border-0" size="lg">Fund Project</Button>
                               </Card>
 
                               <Card title="Transparency Data">
@@ -197,12 +197,12 @@ export const DonorDashboard: React.FC = () => {
                          const score = matchData?.score || 0;
                          
                          return (
-                             <Card key={project.id} className="group relative flex flex-col h-full hover:border-zinc-600 transition-colors cursor-pointer bg-zinc-900/50 border-zinc-800">
+                             <Card key={project.id} className="group relative flex flex-col h-full hover:border-muted-foreground transition-colors cursor-pointer bg-card border-border">
                                  <div onClick={() => setSelectedProject(project)} className="flex-1">
                                      <div className="h-48 overflow-hidden rounded-md mb-4 relative">
                                          <img src={project.imageUrl} alt={project.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                                          {score > 80 && (
-                                             <div className="absolute top-2 right-2 bg-emerald-500/90 backdrop-blur-sm text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">
+                                             <div className="absolute top-2 right-2 bg-emerald-500/90 backdrop-blur-sm text-primary-foreground text-xs font-bold px-3 py-1 rounded-full shadow-lg">
                                                  {score}% Match
                                              </div>
                                          )}
@@ -218,10 +218,10 @@ export const DonorDashboard: React.FC = () => {
                                      </p>
                                  </div>
 
-                                 <div className="pt-4 border-t border-zinc-800 mt-auto">
+                                 <div className="pt-4 border-t border-border mt-auto">
                                      <div className="flex justify-between items-center mb-4">
                                          <div className="text-sm">
-                                             <span className="font-semibold text-white">${project.currentFunding.toLocaleString()}</span>
+                                             <span className="font-semibold text-foreground">${project.currentFunding.toLocaleString()}</span>
                                              <span className="text-zinc-500"> raised of ${project.fundingGoal.toLocaleString()}</span>
                                          </div>
                                          <span className="text-xs text-zinc-500">{Math.round((project.currentFunding/project.fundingGoal)*100)}%</span>
@@ -244,10 +244,10 @@ export const DonorDashboard: React.FC = () => {
          {activeTab === 'profile' && (
              <div className=" mx-auto p-8 space-y-8 animate-in fade-in slide-in-from-bottom-4">
                 {/* Header */}
-                <div className="flex items-center justify-between border-b border-zinc-800 pb-6">
+                <div className="flex items-center justify-between border-b border-border pb-6">
                     <div>
-                        <h1 className="text-3xl font-bold text-white">Investor Profile</h1>
-                        <p className="text-zinc-400">Manage your decentralized identity and investment thesis.</p>
+                        <h1 className="text-3xl font-bold text-foreground">Investor Profile</h1>
+                        <p className="text-muted-foreground">Manage your decentralized identity and investment thesis.</p>
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1 bg-emerald-950/30 border border-emerald-900/50 rounded-full text-emerald-400 text-sm font-medium">
                         <ShieldCheck size={16} />
@@ -259,28 +259,28 @@ export const DonorDashboard: React.FC = () => {
                     {/* Left Column: Identity Card */}
                     <Card className="md:col-span-1 space-y-6">
                         <div className="flex flex-col items-center text-center">
-                            <div className="h-24 w-24 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-3xl font-bold text-white mb-4 border-4 border-zinc-950 shadow-xl">
+                            <div className="h-24 w-24 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-3xl font-bold text-primary-foreground mb-4 border-4 border-background shadow-xl">
                                 {profileData.name.charAt(0)}
                             </div>
-                            <h2 className="text-xl font-bold text-white">{profileData.name}</h2>
+                            <h2 className="text-xl font-bold text-foreground">{profileData.name}</h2>
                             <p className="text-sm text-zinc-500 mb-4 flex items-center justify-center gap-1">
                                 <Globe size={12}/> {profileData.location}
                             </p>
                             
                             <div className="w-full grid grid-cols-2 gap-2 text-center mb-6">
-                                <div className="bg-zinc-900 p-2 rounded border border-zinc-800">
-                                    <div className="text-lg font-bold text-white">12</div>
-                                    <div className="text-[10px] text-zinc-500 uppercase">Investments</div>
+                                <div className="bg-muted p-2 rounded border border-border">
+                                    <div className="text-lg font-bold text-foreground">12</div>
+                                    <div className="text-[10px] text-muted-foreground uppercase">Investments</div>
                                 </div>
-                                <div className="bg-zinc-900 p-2 rounded border border-zinc-800">
+                                <div className="bg-muted p-2 rounded border border-border">
                                     <div className="text-lg font-bold text-emerald-400">${(profileData.totalInvested / 1000)}k</div>
-                                    <div className="text-[10px] text-zinc-500 uppercase">Deployed</div>
+                                    <div className="text-[10px] text-muted-foreground uppercase">Deployed</div>
                                 </div>
                             </div>
                             
                             <div className="w-full flex justify-center gap-4">
                                 {profileData.website && (
-                                    <a href={profileData.website} target="_blank" rel="noreferrer" className="p-2 bg-zinc-800 rounded-full text-zinc-400 hover:text-white transition-colors">
+                                    <a href={profileData.website} target="_blank" rel="noreferrer" className="p-2 bg-muted rounded-full text-muted-foreground hover:text-foreground transition-colors">
                                         <LinkIcon size={16} />
                                     </a>
                                 )}
@@ -292,31 +292,31 @@ export const DonorDashboard: React.FC = () => {
                             </div>
                         </div>
 
-                        <div className="space-y-4 pt-4 border-t border-zinc-800">
-                            <h3 className="text-xs font-bold text-zinc-500 uppercase">Investment Thesis</h3>
+                        <div className="space-y-4 pt-4 border-t border-border">
+                            <h3 className="text-xs font-bold text-muted-foreground uppercase">Investment Thesis</h3>
                             
                             <div className="space-y-3">
-                                <div className="flex items-center justify-between text-sm p-2 bg-zinc-900/50 rounded">
-                                    <div className="flex items-center gap-2 text-zinc-300">
-                                        <DollarSign size={14} className="text-zinc-500" /> Ticket Size
+                                <div className="flex items-center justify-between text-sm p-2 bg-muted/50 rounded">
+                                    <div className="flex items-center gap-2 text-muted-foreground">
+                                        <DollarSign size={14} className="text-muted-foreground" /> Ticket Size
                                     </div>
-                                    <span className="font-mono text-white">{profileData.ticketSize}</span>
+                                    <span className="font-mono text-foreground">{profileData.ticketSize}</span>
                                 </div>
-                                <div className="flex items-center justify-between text-sm p-2 bg-zinc-900/50 rounded">
-                                    <div className="flex items-center gap-2 text-zinc-300">
-                                        <Target size={14} className="text-zinc-500" /> Stage
+                                <div className="flex items-center justify-between text-sm p-2 bg-muted/50 rounded">
+                                    <div className="flex items-center gap-2 text-muted-foreground">
+                                        <Target size={14} className="text-muted-foreground" /> Stage
                                     </div>
-                                    <span className="font-mono text-white">{profileData.stage}</span>
+                                    <span className="font-mono text-foreground">{profileData.stage}</span>
                                 </div>
-                                <div className="flex items-center justify-between text-sm p-2 bg-zinc-900/50 rounded">
-                                    <div className="flex items-center gap-2 text-zinc-300">
-                                        <Briefcase size={14} className="text-zinc-500" /> Focus Area
+                                <div className="flex items-center justify-between text-sm p-2 bg-muted/50 rounded">
+                                    <div className="flex items-center gap-2 text-muted-foreground">
+                                        <Briefcase size={14} className="text-muted-foreground" /> Focus Area
                                     </div>
                                     <div className="flex flex-wrap justify-end gap-1 max-w-[150px]">
                                         {profileData.interests.slice(0, 3).map((tag, i) => (
-                                            <span key={i} className="text-[10px] bg-zinc-800 px-1.5 py-0.5 rounded text-zinc-300">{tag}</span>
+                                            <span key={i} className="text-[10px] bg-muted px-1.5 py-0.5 rounded text-muted-foreground">{tag}</span>
                                         ))}
-                                        {profileData.interests.length > 3 && <span className="text-[10px] text-zinc-500">+{profileData.interests.length - 3}</span>}
+                                        {profileData.interests.length > 3 && <span className="text-[10px] text-muted-foreground">+{profileData.interests.length - 3}</span>}
                                     </div>
                                 </div>
                             </div>

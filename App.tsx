@@ -1,6 +1,6 @@
 import React from 'react';
 import { AppProvider, useApp } from './AppContext';
-import { Navbar } from './components/Navbar';
+import { ThemeProvider } from './hooks/use-theme';
 import { AuthPage } from './pages/AuthPage';
 import { CreatorDashboard } from './pages/CreatorDashboard';
 import { DonorDashboard } from './pages/DonorDashboard';
@@ -14,9 +14,7 @@ const MainContent: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#111] text-white selection:bg-blue-500 selection:text-white pb-20">
-      <Navbar />
-      
+    <div className="min-h-screen bg-background text-foreground">
       {currentUser.role === UserRole.CREATOR && <CreatorDashboard />}
       
       {currentUser.role === UserRole.DONOR && <DonorDashboard />}
@@ -26,8 +24,10 @@ const MainContent: React.FC = () => {
 
 export default function App() {
   return (
-    <AppProvider>
-      <MainContent />
-    </AppProvider>
+    <ThemeProvider defaultTheme="dark" storageKey="texora-ui-theme">
+      <AppProvider>
+        <MainContent />
+      </AppProvider>
+    </ThemeProvider>
   );
 }

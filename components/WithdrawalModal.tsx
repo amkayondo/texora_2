@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { X, Check, Loader } from 'lucide-react';
 import { useApp } from '../AppContext';
 import { PaymentMethod, PaymentMethodType } from '../types';
-import { Button } from './Button';
+import { Button } from '@/components/ui/button';
 import { PaymentMethodForm } from './PaymentMethodForm';
 
 interface WithdrawalModalProps {

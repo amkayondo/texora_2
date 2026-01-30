@@ -1,30 +1,67 @@
-import React from 'react';
+import * as React from "react"
+import { 
+  Card as ShadcnCard, 
+  CardHeader, 
+  CardTitle, 
+  CardDescription, 
+  CardContent,
+  CardFooter,
+  CardAction
+} from "@/components/ui/card"
+import { cn } from "@/lib/utils"
 
-interface CardProps {
-  children: React.ReactNode;
+type CardProps = {
+  children?: React.ReactNode;
   className?: string;
   title?: string;
   description?: string;
   action?: React.ReactNode;
+  size?: "default" | "sm";
+} & Omit<React.HTMLAttributes<HTMLDivElement>, 'title'>;
+
+export function Card({ 
+  children, 
+  className, 
+  title, 
+  description, 
+  action,
+  size,
+  ...props 
+}: CardProps) {
+  return (
+    <ShadcnCard 
+      className={cn(
+        "bg-card border-border text-card-foreground",
+        className
+      )} 
+      size={size}
+      {...props}
+    >
+      {(title || action) && (
+        <CardHeader>
+          <div className="flex justify-between items-start">
+            <div>
+              {title && <CardTitle className="text-xl">{title}</CardTitle>}
+              {description && <CardDescription className="mt-2">{description}</CardDescription>}
+            </div>
+            {action && <CardAction>{action}</CardAction>}
+          </div>
+        </CardHeader>
+      )}
+      <CardContent>
+        {children}
+      </CardContent>
+    </ShadcnCard>
+  )
 }
 
-export const Card: React.FC<CardProps> = ({ children, className = '', title, description, action }) => {
-  return (
-    <div className={`rounded-xl border border-zinc-800 bg-zinc-900/50 text-card-foreground shadow-sm ${className}`}>
-      {(title || action) && (
-        <div className="flex flex-col space-y-1.5 p-6 pb-2">
-            <div className="flex justify-between items-start">
-               <div>
-                 {title && <h3 className="font-semibold leading-none tracking-tight text-xl">{title}</h3>}
-                 {description && <p className="text-sm text-zinc-400 mt-2">{description}</p>}
-               </div>
-               {action}
-            </div>
-        </div>
-      )}
-      <div className="p-6 pt-2">
-        {children}
-      </div>
-    </div>
-  );
-};
+// Re-export the original shadcn Card components for direct use
+export { 
+  ShadcnCard as BaseCard,
+  CardHeader, 
+  CardTitle, 
+  CardDescription, 
+  CardContent,
+  CardFooter,
+  CardAction
+}
