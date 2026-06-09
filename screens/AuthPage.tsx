@@ -5,15 +5,31 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Briefcase, User, ArrowRight, ShieldCheck, AlertTriangle, Fingerprint, Loader2, CheckCircle2 } from 'lucide-react';
 
+const DEMO_PASSWORD = 'TexoraDemo123!';
+const DEMO_ACCOUNTS = {
+  [UserRole.CREATOR]: {
+    label: 'Creator demo',
+    email: 'creator@texora.demo',
+    password: DEMO_PASSWORD,
+  },
+  [UserRole.DONOR]: {
+    label: 'Investor demo',
+    email: 'donor@texora.demo',
+    password: DEMO_PASSWORD,
+  },
+};
+
 export const AuthPage: React.FC = () => {
   const { login } = useApp();
   const [role, setRole] = useState<UserRole | null>(null);
   const [step, setStep] = useState<'intro' | 'login' | 'verify'>('intro');
   const [verificationProgress, setVerificationProgress] = useState(0);
 
-  // Demo Credentials
+  const [authMode, setAuthMode] = useState<'sign-in' | 'sign-up'>('sign-in');
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [authError, setAuthError] = useState('');
 
   // Intro Animation - step through connection phases
   const [connectionStep, setConnectionStep] = useState(0);
@@ -35,34 +51,41 @@ export const AuthPage: React.FC = () => {
     return () => clearInterval(interval);
   }, []);
 
-  // Verification Logic
-  const handleLogin = () => {
+  const handleLogin = async () => {
      if (!role) return;
+     setAuthError('');
      setStep('verify');
-     // Simulate Verification Process
-     let progress = 0;
+     setVerificationProgress(5);
+
      const interval = setInterval(() => {
-        progress += Math.floor(Math.random() * 15) + 5;
-        if (progress >= 100) {
-           progress = 100;
-           clearInterval(interval);
-           setTimeout(() => {
-               login(role);
-           }, 800);
-        }
-        setVerificationProgress(progress);
+        setVerificationProgress((current) => Math.min(current + 12, 92));
      }, 300);
+
+     try {
+        await login(role, email.trim(), password, authMode, name.trim());
+        setVerificationProgress(100);
+     } catch (error) {
+        setAuthError(error instanceof Error ? error.message : 'Authentication failed');
+        setVerificationProgress(0);
+        setStep('login');
+     } finally {
+        clearInterval(interval);
+     }
   };
 
-  const setDemo = (type: UserRole) => {
+  const selectRole = (type: UserRole) => {
       setRole(type);
-      if (type === UserRole.CREATOR) {
-          setEmail('alice@texora.demo');
-          setPassword('creator_pass_123');
-      } else {
-          setEmail('bob@texora.demo');
-          setPassword('investor_pass_456');
-      }
+      setAuthError('');
+  };
+
+  const useDemoAccount = (type: UserRole) => {
+      const account = DEMO_ACCOUNTS[type];
+      setRole(type);
+      setAuthMode('sign-in');
+      setName('');
+      setEmail(account.email);
+      setPassword(account.password);
+      setAuthError('');
   };
 
   if (step === 'intro') {
@@ -100,7 +123,7 @@ export const AuthPage: React.FC = () => {
                     {s.label}
                   </span>
                   {connectionStep === s.id - 1 && (
-                    <Loader2 size={14} className="animate-spin text-zinc-500 ml-auto" />
+                    <Loader2 size={14} className="animate-spin text-muted-foreground ml-auto" />
                   )}
                 </div>
               ))}
@@ -142,7 +165,7 @@ export const AuthPage: React.FC = () => {
                             {s.label}
                           </span>
                           {verificationProgress <= s.threshold && verificationProgress > (s.threshold - 30) && (
-                            <Loader2 size={14} className="animate-spin text-zinc-500 ml-auto" />
+                            <Loader2 size={14} className="animate-spin text-muted-foreground ml-auto" />
                           )}
                         </div>
                       ))}
@@ -153,40 +176,38 @@ export const AuthPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2">
+    <div className="min-h-screen grid grid-cols-1 lg:grid-cols-[1.08fr_0.92fr] bg-background">
       {/* Left: Hero & Branding */}
       <div className="relative hidden lg:flex flex-col justify-between p-12 bg-card border-r border-border overflow-hidden">
-        {/* Updated Image to Gradient */}
-        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop')] bg-cover bg-center opacity-30 mix-blend-overlay"></div>
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-card"></div>
+        <div className="absolute inset-6 rounded-[2rem] border border-border bg-muted/50"></div>
         
         <div className="relative z-10">
           <div className="mb-8">
-             <span className="text-2xl font-bold tracking-tight text-foreground">Texora</span>
+             <span className="inline-flex h-10 items-center rounded-full bg-primary px-5 text-sm font-semibold text-primary-foreground">Texora</span>
           </div>
-          <h1 className="text-5xl font-extrabold tracking-tight text-foreground leading-tight mb-6">
-            Fund Ideas. <br/> <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">Build Trust.</span>
+          <h1 className="text-6xl font-semibold tracking-normal text-foreground leading-[0.98] mb-6">
+            Fund ideas with visible proof.
           </h1>
           <p className="text-xl text-muted-foreground max-w-lg mb-8">
             Connect with donors, get matched by AI, and bring your projects to life with milestone-based funding.
           </p>
-          <div className="space-y-3 text-zinc-500">
-            <div className="flex items-center gap-2">
-              <CheckCircle2 size={16} className="text-emerald-500" />
+          <div className="grid max-w-xl grid-cols-1 gap-2 text-sm text-muted-foreground">
+            <div className="fluid-rail flex items-center gap-3 px-4 py-3">
+              <CheckCircle2 size={16} className="text-foreground" />
               <span>AI-powered donor matching</span>
             </div>
-            <div className="flex items-center gap-2">
-              <CheckCircle2 size={16} className="text-emerald-500" />
+            <div className="fluid-rail flex items-center gap-3 px-4 py-3">
+              <CheckCircle2 size={16} className="text-foreground" />
               <span>Milestone-based fund release</span>
             </div>
-            <div className="flex items-center gap-2">
-              <CheckCircle2 size={16} className="text-emerald-500" />
+            <div className="fluid-rail flex items-center gap-3 px-4 py-3">
+              <CheckCircle2 size={16} className="text-foreground" />
               <span>Transparent & verifiable</span>
             </div>
           </div>
         </div>
 
-        <div className="relative z-10 text-xs text-zinc-600">
+        <div className="relative z-10 text-xs text-muted-foreground">
           © 2026 Texora. All rights reserved.
         </div>
       
@@ -196,7 +217,7 @@ export const AuthPage: React.FC = () => {
       <div className="flex items-center justify-center p-8 bg-background relative">
         <div className="w-full max-w-md space-y-8 relative z-10">
           <div className="text-center lg:text-left">
-            <h2 className="text-3xl font-bold tracking-tight text-foreground">Access Texora</h2>
+            <h2 className="text-4xl font-semibold tracking-normal text-foreground">Access Texora</h2>
             <p className="mt-2 text-muted-foreground">Continue as a creator or investor.</p>
           </div>
 
@@ -204,11 +225,10 @@ export const AuthPage: React.FC = () => {
              {!role ? (
                <div className="grid grid-cols-1 gap-4">
                   <button 
-                    onClick={() => setDemo(UserRole.CREATOR)}
-                    className="flex items-center p-4 border border-border rounded-xl hover:bg-muted hover:border-blue-500/50 transition-all group text-left relative overflow-hidden"
+                    onClick={() => selectRole(UserRole.CREATOR)}
+                    className="fluid-panel fluid-hover flex items-center p-4 group text-left"
                   >
-                     <div className="absolute inset-0 bg-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                     <div className="h-12 w-12 rounded-full bg-blue-500/10 text-blue-500 flex items-center justify-center mr-4 group-hover:bg-blue-500 group-hover:text-primary-foreground transition-colors">
+                     <div className="h-12 w-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center mr-4 transition-colors">
                         <Briefcase size={24} />
                      </div>
                      <div>
@@ -219,11 +239,10 @@ export const AuthPage: React.FC = () => {
                   </button>
 
                   <button 
-                    onClick={() => setDemo(UserRole.DONOR)}
-                    className="flex items-center p-4 border border-border rounded-xl hover:bg-muted hover:border-emerald-500/50 transition-all group text-left relative overflow-hidden"
+                    onClick={() => selectRole(UserRole.DONOR)}
+                    className="fluid-panel fluid-hover flex items-center p-4 group text-left"
                   >
-                     <div className="absolute inset-0 bg-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                     <div className="h-12 w-12 rounded-full bg-emerald-500/10 text-emerald-500 flex items-center justify-center mr-4 group-hover:bg-emerald-500 group-hover:text-primary-foreground transition-colors">
+                     <div className="h-12 w-12 rounded-full bg-secondary text-secondary-foreground flex items-center justify-center mr-4 transition-colors">
                         <User size={24} />
                      </div>
                      <div>
@@ -243,14 +262,46 @@ export const AuthPage: React.FC = () => {
                       ← Back
                     </button>
 
-                    <div className="bg-muted/50 p-4 rounded-lg border border-border mb-6">
-                        <p className="text-xs text-zinc-500 uppercase font-bold mb-2">Demo Credentials Auto-Filled</p>
-                        <div className="flex justify-between items-center text-sm text-zinc-300 font-mono">
-                            <span>{email}</span>
-                            <span className="h-2 w-2 rounded-full bg-green-500"></span>
+                    <div className="fluid-rail p-4 mb-6">
+                        <p className="text-xs text-muted-foreground uppercase font-semibold tracking-[0.08em] mb-2">
+                          {role === UserRole.CREATOR ? 'Creator' : 'Investor'} account
+                        </p>
+                        <div className="flex justify-between items-center text-sm text-foreground">
+                            <span>{authMode === 'sign-in' ? 'Sign in with your account' : 'Create a new account'}</span>
+                            <span className="h-2 w-2 rounded-full bg-foreground"></span>
                         </div>
                     </div>
 
+                    {authMode === 'sign-in' && (
+                      <div className="fluid-rail space-y-3 p-4">
+                        <div className="flex items-center justify-between gap-3">
+                          <div>
+                            <p className="text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+                              {DEMO_ACCOUNTS[role].label}
+                            </p>
+                            <p className="mt-1 break-all font-mono text-sm text-foreground">{DEMO_ACCOUNTS[role].email}</p>
+                            <p className="font-mono text-xs text-muted-foreground">{DEMO_ACCOUNTS[role].password}</p>
+                          </div>
+                          <Button
+                            type="button"
+                            variant="secondary"
+                            size="sm"
+                            onClick={() => useDemoAccount(role)}
+                            className="shrink-0"
+                          >
+                            Use demo
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+
+                    {authMode === 'sign-up' && (
+                      <Input
+                          label="Name"
+                          value={name}
+                          onChange={(e) => setName(e.target.value)}
+                      />
+                    )}
                     <Input 
                         label="Email" 
                         value={email} 
@@ -263,13 +314,28 @@ export const AuthPage: React.FC = () => {
                         value={password}
                         onChange={(e) => setPassword(e.target.value)} 
                     />
+
+                    {authError && (
+                      <div className="fluid-rail border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
+                        {authError}
+                      </div>
+                    )}
                     
-                    <Button className="w-full h-12 text-base bg-primary hover:bg-primary/90 text-primary-foreground border-0 shadow-lg shadow-primary/20" onClick={handleLogin}>
-                       Login
+                    <Button className="w-full h-12 text-base" onClick={handleLogin} disabled={!email || !password || (authMode === 'sign-up' && !name)}>
+                       {authMode === 'sign-in' ? 'Login' : 'Create account'}
                     </Button>
                     
-                    <p className="text-center text-sm text-zinc-500">
-                      Don't have an account? <button className="text-blue-400 hover:text-blue-300 transition-colors">Create account</button>
+                    <p className="text-center text-sm text-muted-foreground">
+                      {authMode === 'sign-in' ? "Don't have an account?" : 'Already have an account?'}{' '}
+                      <button
+                        className="text-foreground hover:underline transition-colors"
+                        onClick={() => {
+                          setAuthError('');
+                          setAuthMode(authMode === 'sign-in' ? 'sign-up' : 'sign-in');
+                        }}
+                      >
+                        {authMode === 'sign-in' ? 'Create account' : 'Login'}
+                      </button>
                     </p>
                   </div>
                </div>

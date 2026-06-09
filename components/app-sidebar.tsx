@@ -116,7 +116,7 @@ export function AppSidebar({ activeTab, setActiveTab, onProjectSelect, ...props 
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" className="data-[state=open]:bg-sidebar-accent">
-              <div className="bg-primary text-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
+              <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-full">
                 <Globe className="size-4" />
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
@@ -245,7 +245,7 @@ export function AppSidebar({ activeTab, setActiveTab, onProjectSelect, ...props 
                   className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
                 >
                   <Avatar className="h-8 w-8 rounded-lg">
-                    <AvatarFallback className="rounded-lg bg-gradient-to-br from-primary to-primary/60 text-primary-foreground">
+                    <AvatarFallback className="rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
                       {currentUser?.name?.charAt(0) || 'U'}
                     </AvatarFallback>
                   </Avatar>
@@ -267,7 +267,7 @@ export function AppSidebar({ activeTab, setActiveTab, onProjectSelect, ...props 
                 <DropdownMenuLabel className="p-0 font-normal">
                   <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                     <Avatar className="h-8 w-8 rounded-lg">
-                      <AvatarFallback className="rounded-lg bg-gradient-to-br from-primary to-primary/60 text-primary-foreground">
+                      <AvatarFallback className="rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
                         {currentUser?.name?.charAt(0) || 'U'}
                       </AvatarFallback>
                     </Avatar>

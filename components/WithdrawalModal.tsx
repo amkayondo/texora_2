@@ -77,11 +77,11 @@ export const WithdrawalModal: React.FC<WithdrawalModalProps> = ({ isOpen, onClos
 
   return (
     <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-zinc-900 border border-zinc-700 rounded-xl w-full max-w-md shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+      <div className="fluid-panel w-full max-w-md animate-in fade-in zoom-in-95 duration-200">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-zinc-800">
-          <h2 className="text-xl font-bold text-white">Withdraw Funds</h2>
-          <button onClick={handleClose} className="text-zinc-400 hover:text-white">
+        <div className="flex items-center justify-between p-6 border-b border-border">
+          <h2 className="text-xl font-bold text-foreground">Withdraw Funds</h2>
+          <button onClick={handleClose} className="text-muted-foreground hover:text-foreground">
             <X size={20} />
           </button>
         </div>
@@ -89,7 +89,7 @@ export const WithdrawalModal: React.FC<WithdrawalModalProps> = ({ isOpen, onClos
         {/* Step 1: Select Payment Method */}
         {step === 'select-method' && !showAddMethod && (
           <div className="p-6 space-y-4">
-            <p className="text-sm text-zinc-400">Select a payment method to withdraw your funds</p>
+            <p className="text-sm text-muted-foreground">Select a payment method to withdraw your funds</p>
 
             {paymentMethods.length > 0 ? (
               <div className="space-y-3">
@@ -97,16 +97,16 @@ export const WithdrawalModal: React.FC<WithdrawalModalProps> = ({ isOpen, onClos
                   <button
                     key={method.id}
                     onClick={() => handleSelectMethod(method.id)}
-                    className="w-full p-4 bg-zinc-800 hover:bg-zinc-750 rounded-lg border border-zinc-700 hover:border-indigo-500 transition-all text-left"
+                    className="w-full p-4 bg-muted hover:bg-muted rounded-lg border border-border hover:border-indigo-500 transition-all text-left"
                   >
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="font-medium text-white">
+                        <p className="font-medium text-foreground">
                           {method.type === PaymentMethodType.BANK_ACCOUNT
                             ? method.bankName
                             : `${method.mobileProvider}`}
                         </p>
-                        <p className="text-sm text-zinc-500">
+                        <p className="text-sm text-muted-foreground">
                           {method.type === PaymentMethodType.BANK_ACCOUNT
                             ? `****${method.accountNumber?.slice(-4)} • ${method.accountName}`
                             : `${method.phoneNumber?.slice(0, 5)}XX XXX ${method.phoneNumber?.slice(-4)}`}
@@ -122,7 +122,7 @@ export const WithdrawalModal: React.FC<WithdrawalModalProps> = ({ isOpen, onClos
                 ))}
               </div>
             ) : (
-              <div className="text-center py-8 text-zinc-500">
+              <div className="text-center py-8 text-muted-foreground">
                 <p>No payment methods added yet</p>
               </div>
             )}
@@ -152,22 +152,22 @@ export const WithdrawalModal: React.FC<WithdrawalModalProps> = ({ isOpen, onClos
         {step === 'enter-amount' && (
           <div className="p-6 space-y-6">
             <div>
-              <label className="text-sm font-medium text-zinc-300 mb-2 block">
+              <label className="text-sm font-medium text-foreground mb-2 block">
                 Withdrawal Amount
               </label>
               <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400">UGX</span>
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">UGX</span>
                 <input
                   type="text"
                   value={amount}
                   onChange={(e) => setAmount(formatAmount(e.target.value))}
                   placeholder="0"
-                  className="w-full bg-zinc-950 border border-zinc-800 rounded p-3 pl-14 text-lg font-bold text-white focus:ring-1 focus:ring-indigo-500"
+                  className="w-full bg-background border border-border rounded p-3 pl-14 text-lg font-bold text-foreground focus:ring-1 focus:ring-indigo-500"
                 />
               </div>
               <div className="flex justify-between mt-2">
-                <p className="text-xs text-zinc-500">Minimum: UGX 10,000</p>
-                <p className="text-xs text-zinc-400">Available: UGX {currentBalance.toLocaleString()}</p>
+                <p className="text-xs text-muted-foreground">Minimum: UGX 10,000</p>
+                <p className="text-xs text-muted-foreground">Available: UGX {currentBalance.toLocaleString()}</p>
               </div>
               {numericAmount > currentBalance && (
                 <p className="text-xs text-red-400 mt-1">Insufficient balance</p>
@@ -183,7 +183,7 @@ export const WithdrawalModal: React.FC<WithdrawalModalProps> = ({ isOpen, onClos
                 <button
                   key={percent}
                   onClick={() => setAmount(formatAmount(Math.floor(currentBalance * percent / 100).toString()))}
-                  className="py-2 px-3 bg-zinc-800 hover:bg-zinc-750 rounded text-sm text-white border border-zinc-700"
+                  className="py-2 px-3 bg-muted hover:bg-muted rounded text-sm text-foreground border border-border"
                 >
                   {percent}%
                 </button>
@@ -195,7 +195,7 @@ export const WithdrawalModal: React.FC<WithdrawalModalProps> = ({ isOpen, onClos
                 Back
               </Button>
               <Button
-                className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white border-0"
+                className="flex-1"
                 onClick={handleAmountSubmit}
                 disabled={numericAmount < minAmount || numericAmount > currentBalance}
               >
@@ -208,22 +208,22 @@ export const WithdrawalModal: React.FC<WithdrawalModalProps> = ({ isOpen, onClos
         {/* Step 3: Confirm */}
         {step === 'confirm' && selectedMethod && (
           <div className="p-6 space-y-6">
-            <div className="bg-zinc-800 rounded-lg p-4 space-y-3">
+            <div className="bg-muted rounded-lg p-4 space-y-3">
               <div className="flex justify-between">
-                <span className="text-zinc-400">Withdrawal Amount</span>
-                <span className="font-bold text-white">UGX {numericAmount.toLocaleString()}</span>
+                <span className="text-muted-foreground">Withdrawal Amount</span>
+                <span className="font-bold text-foreground">UGX {numericAmount.toLocaleString()}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-zinc-400">Payment Method</span>
-                <span className="text-white">
+                <span className="text-muted-foreground">Payment Method</span>
+                <span className="text-foreground">
                   {selectedMethod.type === PaymentMethodType.BANK_ACCOUNT
                     ? selectedMethod.bankName
                     : selectedMethod.mobileProvider}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-zinc-400">Processing Time</span>
-                <span className="text-white">Usually 2-3 minutes</span>
+                <span className="text-muted-foreground">Processing Time</span>
+                <span className="text-foreground">Usually 2-3 minutes</span>
               </div>
             </div>
 
@@ -238,7 +238,7 @@ export const WithdrawalModal: React.FC<WithdrawalModalProps> = ({ isOpen, onClos
                 Back
               </Button>
               <Button
-                className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white border-0"
+                className="flex-1"
                 onClick={handleConfirmWithdrawal}
               >
                 Confirm Withdrawal
@@ -254,20 +254,20 @@ export const WithdrawalModal: React.FC<WithdrawalModalProps> = ({ isOpen, onClos
               {isProcessing ? (
                 <>
                   <Loader className="animate-spin mx-auto mb-4 text-indigo-500" size={48} />
-                  <h3 className="text-lg font-bold text-white mb-2">Processing Withdrawal...</h3>
-                  <p className="text-sm text-zinc-400">Please wait while we process your request</p>
+                  <h3 className="text-lg font-bold text-foreground mb-2">Processing Withdrawal...</h3>
+                  <p className="text-sm text-muted-foreground">Please wait while we process your request</p>
                 </>
               ) : withdrawalSuccess ? (
                 <>
                   <div className="mx-auto mb-4 h-12 w-12 rounded-full bg-emerald-950/50 flex items-center justify-center">
                     <Check className="text-emerald-500" size={32} />
                   </div>
-                  <h3 className="text-lg font-bold text-white mb-2">Withdrawal Initiated!</h3>
-                  <p className="text-sm text-zinc-400 mb-6">
+                  <h3 className="text-lg font-bold text-foreground mb-2">Withdrawal Initiated!</h3>
+                  <p className="text-sm text-muted-foreground mb-6">
                     UGX {numericAmount.toLocaleString()} is being sent to your {selectedMethod?.type === PaymentMethodType.BANK_ACCOUNT ? 'bank account' : 'mobile money'}
                   </p>
                   <Button
-                    className="bg-indigo-600 hover:bg-indigo-700 text-white border-0"
+                   
                     onClick={handleClose}
                   >
                     Done

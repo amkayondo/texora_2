@@ -31,7 +31,7 @@ export function Card({
   return (
     <ShadcnCard 
       className={cn(
-        "bg-card border-border text-card-foreground",
+        "fluid-hover",
         className
       )} 
       size={size}
@@ -41,7 +41,7 @@ export function Card({
         <CardHeader>
           <div className="flex justify-between items-start">
             <div>
-              {title && <CardTitle className="text-xl">{title}</CardTitle>}
+              {title && <CardTitle className="text-lg">{title}</CardTitle>}
               {description && <CardDescription className="mt-2">{description}</CardDescription>}
             </div>
             {action && <CardAction>{action}</CardAction>}

@@ -23,7 +23,7 @@ export const DonorProfilePage: React.FC<DonorProfilePageProps> = ({ donorId, onB
           Back
         </Button>
         <div className="text-center mt-12">
-          <p className="text-zinc-400">Donor not found</p>
+          <p className="text-muted-foreground">Donor not found</p>
         </div>
       </div>
     );
@@ -62,7 +62,7 @@ export const DonorProfilePage: React.FC<DonorProfilePageProps> = ({ donorId, onB
             </div>
 
             {donor.location && (
-              <div className="flex items-center gap-2 text-zinc-400 mb-3">
+              <div className="flex items-center gap-2 text-muted-foreground mb-3">
                 <MapPin size={16} />
                 <span>{donor.location}</span>
               </div>
@@ -122,7 +122,7 @@ export const DonorProfilePage: React.FC<DonorProfilePageProps> = ({ donorId, onB
               <DollarSign size={24} className="text-emerald-500" />
             </div>
             <div>
-              <p className="text-sm text-zinc-400">Total Invested</p>
+              <p className="text-sm text-muted-foreground">Total Invested</p>
               <p className="text-2xl font-bold text-foreground">
                 ${(donor.totalInvested || totalInvestedCalculated).toLocaleString()}
               </p>
@@ -136,7 +136,7 @@ export const DonorProfilePage: React.FC<DonorProfilePageProps> = ({ donorId, onB
               <TrendingUp size={24} className="text-indigo-500" />
             </div>
             <div>
-              <p className="text-sm text-zinc-400">Active Investments</p>
+              <p className="text-sm text-muted-foreground">Active Investments</p>
               <p className="text-2xl font-bold text-foreground">
                 {donor.activeInvestments || activeInvestmentsCount}
               </p>
@@ -150,7 +150,7 @@ export const DonorProfilePage: React.FC<DonorProfilePageProps> = ({ donorId, onB
               <Briefcase size={24} className="text-purple-500" />
             </div>
             <div>
-              <p className="text-sm text-zinc-400">Ticket Size</p>
+              <p className="text-sm text-muted-foreground">Ticket Size</p>
               <p className="text-xl font-bold text-foreground">
                 {donor.ticketSize || `$${Math.round(avgTicket / 1000)}k avg`}
               </p>
@@ -167,10 +167,10 @@ export const DonorProfilePage: React.FC<DonorProfilePageProps> = ({ donorId, onB
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-border">
-                    <th className="text-left py-3 px-4 text-sm font-medium text-zinc-400">Project</th>
-                    <th className="text-left py-3 px-4 text-sm font-medium text-zinc-400">Amount</th>
-                    <th className="text-left py-3 px-4 text-sm font-medium text-zinc-400">Date</th>
-                    <th className="text-left py-3 px-4 text-sm font-medium text-zinc-400">Status</th>
+                    <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Project</th>
+                    <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Amount</th>
+                    <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Date</th>
+                    <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Status</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -183,7 +183,7 @@ export const DonorProfilePage: React.FC<DonorProfilePageProps> = ({ donorId, onB
                             <p className="font-medium text-foreground">
                               {project?.title || 'Unknown Project'}
                             </p>
-                            <p className="text-sm text-zinc-500">{project?.category}</p>
+                            <p className="text-sm text-muted-foreground">{project?.category}</p>
                           </div>
                         </td>
                         <td className="py-4 px-4">
@@ -191,7 +191,7 @@ export const DonorProfilePage: React.FC<DonorProfilePageProps> = ({ donorId, onB
                             ${investment.amount.toLocaleString()}
                           </p>
                         </td>
-                        <td className="py-4 px-4 text-zinc-300">
+                        <td className="py-4 px-4 text-foreground">
                           {new Date(investment.date).toLocaleDateString('en-US', {
                             year: 'numeric',
                             month: 'short',
@@ -210,7 +210,7 @@ export const DonorProfilePage: React.FC<DonorProfilePageProps> = ({ donorId, onB
               </table>
             </div>
           ) : (
-            <p className="text-zinc-500 text-center py-8">No investment history available</p>
+            <p className="text-muted-foreground text-center py-8">No investment history available</p>
           )}
         </Card>
       </div>
@@ -218,11 +218,11 @@ export const DonorProfilePage: React.FC<DonorProfilePageProps> = ({ donorId, onB
       {/* About Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card title="About">
-          <p className="text-zinc-300 whitespace-pre-wrap">{donor.bio}</p>
+          <p className="text-foreground whitespace-pre-wrap">{donor.bio}</p>
 
           {donor.joinedDate && (
             <div className="mt-4 pt-4 border-t border-border">
-              <p className="text-sm text-zinc-500">
+              <p className="text-sm text-muted-foreground">
                 Member since {new Date(donor.joinedDate).toLocaleDateString('en-US', {
                   year: 'numeric',
                   month: 'long'
@@ -236,20 +236,20 @@ export const DonorProfilePage: React.FC<DonorProfilePageProps> = ({ donorId, onB
           <div className="space-y-4">
             {donor.investmentStage && (
               <div>
-                <p className="text-sm text-zinc-400 mb-1">Investment Stage</p>
+                <p className="text-sm text-muted-foreground mb-1">Investment Stage</p>
                 <p className="text-foreground font-medium">{donor.investmentStage}</p>
               </div>
             )}
 
             {donor.ticketSize && (
               <div>
-                <p className="text-sm text-zinc-400 mb-1">Typical Ticket Size</p>
+                <p className="text-sm text-muted-foreground mb-1">Typical Ticket Size</p>
                 <p className="text-foreground font-medium">{donor.ticketSize}</p>
               </div>
             )}
 
             <div>
-              <p className="text-sm text-zinc-400 mb-2">Focus Areas</p>
+              <p className="text-sm text-muted-foreground mb-2">Focus Areas</p>
               <div className="flex flex-wrap gap-2">
                 {donor.interests.map((interest, idx) => (
                   <Web3Badge key={idx} type="info">

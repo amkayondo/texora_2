@@ -3,7 +3,7 @@ import * as React from "react"
 type Theme = "dark" | "light" | "system"
 
 type ThemeProviderProps = {
-  children: React.ReactNode
+  children?: React.ReactNode
   defaultTheme?: Theme
   storageKey?: string
 }
@@ -27,7 +27,10 @@ export function ThemeProvider({
   ...props
 }: ThemeProviderProps) {
   const [theme, setTheme] = React.useState<Theme>(
-    () => (localStorage.getItem(storageKey) as Theme) || defaultTheme
+    () => {
+      if (typeof window === "undefined") return defaultTheme
+      return (window.localStorage.getItem(storageKey) as Theme) || defaultTheme
+    }
   )
 
   React.useEffect(() => {
@@ -51,7 +54,7 @@ export function ThemeProvider({
   const value = {
     theme,
     setTheme: (theme: Theme) => {
-      localStorage.setItem(storageKey, theme)
+      window.localStorage.setItem(storageKey, theme)
       setTheme(theme)
     },
   }

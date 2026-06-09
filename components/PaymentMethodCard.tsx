@@ -24,7 +24,7 @@ export const PaymentMethodCard: React.FC<PaymentMethodCardProps> = ({ method, on
   };
 
   return (
-    <div className="bg-zinc-800 rounded-lg p-4 border border-zinc-700 hover:border-zinc-600 transition-all">
+    <div className="bg-muted rounded-lg p-4 border border-border hover:border-foreground/20 transition-all">
       <div className="flex items-start justify-between">
         <div className="flex items-start gap-3 flex-1">
           {/* Icon */}
@@ -41,7 +41,7 @@ export const PaymentMethodCard: React.FC<PaymentMethodCardProps> = ({ method, on
           {/* Details */}
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-1">
-              <p className="font-medium text-white">
+              <p className="font-medium text-foreground">
                 {isBankAccount
                   ? method.bankName
                   : method.mobileProvider?.replace('_', ' ')}
@@ -54,12 +54,12 @@ export const PaymentMethodCard: React.FC<PaymentMethodCardProps> = ({ method, on
               )}
             </div>
 
-            <p className="text-sm text-zinc-400">
+            <p className="text-sm text-muted-foreground">
               {isBankAccount ? (
                 <>
                   {maskAccountNumber(method.accountNumber)} • {method.accountName}
                   {method.branchName && (
-                    <span className="text-zinc-500"> • {method.branchName}</span>
+                    <span className="text-muted-foreground"> • {method.branchName}</span>
                   )}
                 </>
               ) : (
@@ -72,7 +72,7 @@ export const PaymentMethodCard: React.FC<PaymentMethodCardProps> = ({ method, on
               )}
             </p>
 
-            <p className="text-xs text-zinc-500 mt-1">
+            <p className="text-xs text-muted-foreground mt-1">
               Added {new Date(method.createdAt).toLocaleDateString()}
             </p>
           </div>
@@ -92,7 +92,7 @@ export const PaymentMethodCard: React.FC<PaymentMethodCardProps> = ({ method, on
           )}
           <button
             onClick={() => onDelete(method.id)}
-            className="p-2 text-zinc-400 hover:text-red-400 hover:bg-red-950/30 rounded transition-all"
+            className="p-2 text-muted-foreground hover:text-red-400 hover:bg-red-950/30 rounded transition-all"
             title="Delete payment method"
           >
             <Trash2 size={16} />

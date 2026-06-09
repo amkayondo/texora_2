@@ -94,36 +94,36 @@ export const InvestmentModal: React.FC<InvestmentModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-zinc-900 border border-zinc-700 rounded-xl w-full max-w-lg shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+      <div className="fluid-panel w-full max-w-lg animate-in fade-in zoom-in-95 duration-200">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-zinc-800">
+        <div className="flex items-center justify-between p-6 border-b border-border">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-emerald-950/50 rounded-lg">
               <TrendingUp className="text-emerald-500" size={20} />
             </div>
-            <h2 className="text-xl font-bold text-white">Fund Project</h2>
+            <h2 className="text-xl font-bold text-foreground">Fund Project</h2>
           </div>
-          <button onClick={handleClose} className="text-zinc-400 hover:text-white">
+          <button onClick={handleClose} className="text-muted-foreground hover:text-foreground">
             <X size={20} />
           </button>
         </div>
 
         {/* Project Summary */}
-        <div className="p-6 border-b border-zinc-800 bg-zinc-800/30">
+        <div className="p-6 border-b border-border bg-muted/50">
           <div className="flex gap-4">
             <div className="h-16 w-16 rounded-lg bg-gradient-to-br from-emerald-600 to-emerald-800 flex items-center justify-center flex-shrink-0">
-              <Briefcase size={28} className="text-white" />
+              <Briefcase size={28} className="text-foreground" />
             </div>
             <div className="flex-1 min-w-0">
-              <h3 className="font-bold text-white mb-1 truncate">{project.title}</h3>
-              <p className="text-xs text-zinc-400 mb-2">{project.category}</p>
+              <h3 className="font-bold text-foreground mb-1 truncate">{project.title}</h3>
+              <p className="text-xs text-muted-foreground mb-2">{project.category}</p>
               <div className="flex items-center gap-4 text-xs">
                 <div>
-                  <span className="text-zinc-500">Goal: </span>
-                  <span className="text-white font-medium">UGX {project.fundingGoal.toLocaleString()}</span>
+                  <span className="text-muted-foreground">Goal: </span>
+                  <span className="text-foreground font-medium">UGX {project.fundingGoal.toLocaleString()}</span>
                 </div>
                 <div>
-                  <span className="text-zinc-500">Raised: </span>
+                  <span className="text-muted-foreground">Raised: </span>
                   <span className="text-emerald-400 font-medium">UGX {project.currentFunding.toLocaleString()}</span>
                 </div>
               </div>
@@ -135,22 +135,22 @@ export const InvestmentModal: React.FC<InvestmentModalProps> = ({
         {step === 'enter-amount' && (
           <div className="p-6 space-y-6">
             <div>
-              <label className="text-sm font-medium text-zinc-300 mb-2 block">
+              <label className="text-sm font-medium text-foreground mb-2 block">
                 Investment Amount
               </label>
               <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400">UGX</span>
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">UGX</span>
                 <input
                   type="text"
                   value={amount}
                   onChange={(e) => setAmount(formatAmount(e.target.value))}
                   placeholder="0"
-                  className="w-full bg-zinc-950 border border-zinc-800 rounded p-3 pl-14 text-lg font-bold text-white focus:ring-1 focus:ring-emerald-500 focus:outline-none"
+                  className="w-full bg-background border border-border rounded p-3 pl-14 text-lg font-bold text-foreground focus:ring-1 focus:ring-emerald-500 focus:outline-none"
                 />
               </div>
               <div className="flex justify-between mt-2">
-                <p className="text-xs text-zinc-500">Enter any amount</p>
-                <p className="text-xs text-zinc-400">Available: UGX {currentBalance.toLocaleString()}</p>
+                <p className="text-xs text-muted-foreground">Enter any amount</p>
+                <p className="text-xs text-muted-foreground">Available: UGX {currentBalance.toLocaleString()}</p>
               </div>
               {numericAmount > currentBalance && (
                 <p className="text-xs text-red-400 mt-1">Insufficient balance</p>
@@ -162,7 +162,7 @@ export const InvestmentModal: React.FC<InvestmentModalProps> = ({
 
             {/* Quick Amount Buttons */}
             <div>
-              <label className="text-xs font-medium text-zinc-400 mb-2 block">
+              <label className="text-xs font-medium text-muted-foreground mb-2 block">
                 Quick Select (% of remaining goal)
               </label>
               <div className="grid grid-cols-4 gap-2">
@@ -177,8 +177,8 @@ export const InvestmentModal: React.FC<InvestmentModalProps> = ({
                       disabled={isDisabled}
                       className={`py-2 px-3 rounded text-sm border transition-all ${
                         isDisabled
-                          ? 'bg-zinc-800/50 text-zinc-600 border-zinc-800 cursor-not-allowed'
-                          : 'bg-zinc-800 hover:bg-emerald-950/30 hover:border-emerald-700 text-white border-zinc-700'
+                          ? 'bg-muted/70 text-muted-foreground border-border cursor-not-allowed'
+                          : 'bg-muted hover:bg-emerald-950/30 hover:border-emerald-700 text-foreground border-border'
                       }`}
                     >
                       {percent}%
@@ -189,15 +189,15 @@ export const InvestmentModal: React.FC<InvestmentModalProps> = ({
             </div>
 
             {/* Funding Needed Info */}
-            <div className="bg-zinc-800 rounded-lg p-4">
+            <div className="bg-muted rounded-lg p-4">
               <div className="flex items-center gap-2 mb-2">
                 <Target className="text-emerald-500" size={16} />
-                <span className="text-sm font-medium text-white">Funding Needed</span>
+                <span className="text-sm font-medium text-foreground">Funding Needed</span>
               </div>
               <p className="text-2xl font-bold text-emerald-400">
                 UGX {fundingRemaining.toLocaleString()}
               </p>
-              <p className="text-xs text-zinc-500 mt-1">
+              <p className="text-xs text-muted-foreground mt-1">
                 {Math.round((project.currentFunding / project.fundingGoal) * 100)}% funded
               </p>
             </div>
@@ -207,7 +207,7 @@ export const InvestmentModal: React.FC<InvestmentModalProps> = ({
                 Cancel
               </Button>
               <Button
-                className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white border-0"
+                className="flex-1"
                 onClick={handleAmountSubmit}
                 disabled={numericAmount <= 0 || numericAmount > maxAmount}
               >
@@ -220,22 +220,22 @@ export const InvestmentModal: React.FC<InvestmentModalProps> = ({
         {/* Step 2: Confirm */}
         {step === 'confirm' && (
           <div className="p-6 space-y-6">
-            <div className="bg-zinc-800 rounded-lg p-4 space-y-3">
+            <div className="bg-muted rounded-lg p-4 space-y-3">
               <div className="flex justify-between">
-                <span className="text-zinc-400">Investment Amount</span>
-                <span className="font-bold text-white">UGX {numericAmount.toLocaleString()}</span>
+                <span className="text-muted-foreground">Investment Amount</span>
+                <span className="font-bold text-foreground">UGX {numericAmount.toLocaleString()}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-zinc-400">Project</span>
-                <span className="text-white truncate ml-4">{project.title}</span>
+                <span className="text-muted-foreground">Project</span>
+                <span className="text-foreground truncate ml-4">{project.title}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-zinc-400">Your New Balance</span>
-                <span className="text-white">UGX {(currentBalance - numericAmount).toLocaleString()}</span>
+                <span className="text-muted-foreground">Your New Balance</span>
+                <span className="text-foreground">UGX {(currentBalance - numericAmount).toLocaleString()}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-zinc-400">Transaction Type</span>
-                <span className="text-white">Investment</span>
+                <span className="text-muted-foreground">Transaction Type</span>
+                <span className="text-foreground">Investment</span>
               </div>
             </div>
 
@@ -250,7 +250,7 @@ export const InvestmentModal: React.FC<InvestmentModalProps> = ({
                 Back
               </Button>
               <Button
-                className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white border-0"
+                className="flex-1"
                 onClick={handleConfirmInvestment}
               >
                 Confirm Investment
@@ -264,8 +264,8 @@ export const InvestmentModal: React.FC<InvestmentModalProps> = ({
           <div className="p-6">
             <div className="text-center py-8">
               <Loader className="animate-spin mx-auto mb-4 text-emerald-500" size={48} />
-              <h3 className="text-lg font-bold text-white mb-2">Processing Investment...</h3>
-              <p className="text-sm text-zinc-400">Confirming transaction on the blockchain</p>
+              <h3 className="text-lg font-bold text-foreground mb-2">Processing Investment...</h3>
+              <p className="text-sm text-muted-foreground">Confirming transaction on the blockchain</p>
             </div>
           </div>
         )}
@@ -277,20 +277,20 @@ export const InvestmentModal: React.FC<InvestmentModalProps> = ({
               <div className="mx-auto mb-4 h-16 w-16 rounded-full bg-emerald-950/50 flex items-center justify-center">
                 <Check className="text-emerald-500" size={32} />
               </div>
-              <h3 className="text-lg font-bold text-white mb-2">Investment Successful!</h3>
-              <p className="text-sm text-zinc-400 mb-6">
+              <h3 className="text-lg font-bold text-foreground mb-2">Investment Successful!</h3>
+              <p className="text-sm text-muted-foreground mb-6">
                 You've invested UGX {numericAmount.toLocaleString()} in {project.title}
               </p>
 
               {/* Transaction Details */}
-              <div className="bg-zinc-800 rounded-lg p-4 mb-6 text-left">
+              <div className="bg-muted rounded-lg p-4 mb-6 text-left">
                 <div className="space-y-2">
                   <div>
-                    <p className="text-xs text-zinc-500">Transaction Hash</p>
+                    <p className="text-xs text-muted-foreground">Transaction Hash</p>
                     <p className="text-xs font-mono text-emerald-400 break-all">{txHash}</p>
                   </div>
-                  <div className="flex justify-between pt-2 border-t border-zinc-700">
-                    <span className="text-xs text-zinc-500">Status</span>
+                  <div className="flex justify-between pt-2 border-t border-border">
+                    <span className="text-xs text-muted-foreground">Status</span>
                     <span className="text-xs px-2 py-0.5 bg-emerald-900/50 text-emerald-400 rounded">
                       Completed
                     </span>
@@ -307,7 +307,7 @@ export const InvestmentModal: React.FC<InvestmentModalProps> = ({
                   Done
                 </Button>
                 <Button
-                  className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white border-0"
+                  className="flex-1"
                   onClick={handleClose}
                 >
                   View Portfolio

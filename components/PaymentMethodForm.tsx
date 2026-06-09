@@ -83,7 +83,7 @@ export const PaymentMethodForm: React.FC<PaymentMethodFormProps> = ({ onSubmit, 
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Payment Type Selector */}
       <div>
-        <label className="text-sm font-medium text-zinc-300 mb-3 block">Payment Method Type</label>
+        <label className="text-sm font-medium text-foreground mb-3 block">Payment Method Type</label>
         <div className="grid grid-cols-2 gap-3">
           <button
             type="button"
@@ -91,12 +91,12 @@ export const PaymentMethodForm: React.FC<PaymentMethodFormProps> = ({ onSubmit, 
             className={`p-4 rounded-lg border-2 transition-all ${
               methodType === PaymentMethodType.MOBILE_MONEY
                 ? 'border-indigo-500 bg-indigo-950/50'
-                : 'border-zinc-700 bg-zinc-900 hover:border-zinc-600'
+                : 'border-border bg-card hover:border-foreground/20'
             }`}
           >
             <div className="text-center">
-              <p className="font-bold text-white mb-1">Mobile Money</p>
-              <p className="text-xs text-zinc-400">MTN or Airtel</p>
+              <p className="font-bold text-foreground mb-1">Mobile Money</p>
+              <p className="text-xs text-muted-foreground">MTN or Airtel</p>
             </div>
           </button>
           <button
@@ -105,12 +105,12 @@ export const PaymentMethodForm: React.FC<PaymentMethodFormProps> = ({ onSubmit, 
             className={`p-4 rounded-lg border-2 transition-all ${
               methodType === PaymentMethodType.BANK_ACCOUNT
                 ? 'border-indigo-500 bg-indigo-950/50'
-                : 'border-zinc-700 bg-zinc-900 hover:border-zinc-600'
+                : 'border-border bg-card hover:border-foreground/20'
             }`}
           >
             <div className="text-center">
-              <p className="font-bold text-white mb-1">Bank Account</p>
-              <p className="text-xs text-zinc-400">Local bank</p>
+              <p className="font-bold text-foreground mb-1">Bank Account</p>
+              <p className="text-xs text-muted-foreground">Local bank</p>
             </div>
           </button>
         </div>
@@ -120,11 +120,11 @@ export const PaymentMethodForm: React.FC<PaymentMethodFormProps> = ({ onSubmit, 
       {methodType === PaymentMethodType.BANK_ACCOUNT && (
         <div className="space-y-4">
           <div>
-            <label className="text-sm font-medium text-zinc-300 mb-1 block">Bank Name</label>
+            <label className="text-sm font-medium text-foreground mb-1 block">Bank Name</label>
             <select
               value={bankName}
               onChange={(e) => setBankName(e.target.value as UgandanBank)}
-              className="w-full bg-zinc-950 border border-zinc-800 rounded p-2 text-sm text-white focus:ring-1 focus:ring-indigo-500"
+              className="w-full bg-background border border-border rounded p-2 text-sm text-foreground focus:ring-1 focus:ring-indigo-500"
             >
               {Object.values(UgandanBank).map(bank => (
                 <option key={bank} value={bank}>{bank}</option>
@@ -172,7 +172,7 @@ export const PaymentMethodForm: React.FC<PaymentMethodFormProps> = ({ onSubmit, 
       {methodType === PaymentMethodType.MOBILE_MONEY && (
         <div className="space-y-4">
           <div>
-            <label className="text-sm font-medium text-zinc-300 mb-2 block">Mobile Money Provider</label>
+            <label className="text-sm font-medium text-foreground mb-2 block">Mobile Money Provider</label>
             <div className="grid grid-cols-2 gap-3">
               <button
                 type="button"
@@ -180,10 +180,10 @@ export const PaymentMethodForm: React.FC<PaymentMethodFormProps> = ({ onSubmit, 
                 className={`p-3 rounded-lg border-2 transition-all ${
                   mobileProvider === MobileMoneyProvider.MTN
                     ? 'border-yellow-500 bg-yellow-950/30'
-                    : 'border-zinc-700 bg-zinc-900 hover:border-zinc-600'
+                    : 'border-border bg-card hover:border-foreground/20'
                 }`}
               >
-                <p className="font-bold text-white">MTN Mobile Money</p>
+                <p className="font-bold text-foreground">MTN Mobile Money</p>
               </button>
               <button
                 type="button"
@@ -191,10 +191,10 @@ export const PaymentMethodForm: React.FC<PaymentMethodFormProps> = ({ onSubmit, 
                 className={`p-3 rounded-lg border-2 transition-all ${
                   mobileProvider === MobileMoneyProvider.AIRTEL
                     ? 'border-red-500 bg-red-950/30'
-                    : 'border-zinc-700 bg-zinc-900 hover:border-zinc-600'
+                    : 'border-border bg-card hover:border-foreground/20'
                 }`}
               >
-                <p className="font-bold text-white">Airtel Money</p>
+                <p className="font-bold text-foreground">Airtel Money</p>
               </button>
             </div>
           </div>
@@ -207,7 +207,7 @@ export const PaymentMethodForm: React.FC<PaymentMethodFormProps> = ({ onSubmit, 
               placeholder="256772123456"
               maxLength={12}
             />
-            <p className="text-xs text-zinc-500 mt-1">Format: 256XXXXXXXXX (no spaces)</p>
+            <p className="text-xs text-muted-foreground mt-1">Format: 256XXXXXXXXX (no spaces)</p>
             {errors.phoneNumber && (
               <p className="text-xs text-red-400 mt-1">{errors.phoneNumber}</p>
             )}
@@ -228,11 +228,11 @@ export const PaymentMethodForm: React.FC<PaymentMethodFormProps> = ({ onSubmit, 
       )}
 
       {/* Action Buttons */}
-      <div className="flex gap-3 pt-4 border-t border-zinc-800">
+      <div className="flex gap-3 pt-4 border-t border-border">
         <Button type="button" variant="outline" className="flex-1" onClick={onCancel}>
           Cancel
         </Button>
-        <Button type="submit" className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white border-0">
+        <Button type="submit" className="flex-1">
           Add Payment Method
         </Button>
       </div>

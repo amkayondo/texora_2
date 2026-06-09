@@ -18,7 +18,7 @@ export const MilestoneTracker: React.FC<MilestoneTrackerProps> = ({ projectId, m
   const [uploadNotes, setUploadNotes] = useState<Record<string, string>>({});
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [autoApproveCountdown, setAutoApproveCountdown] = useState<Record<string, number>>({});
-  const autoApproveTimers = useRef<Record<string, NodeJS.Timeout>>({});
+  const autoApproveTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
 
   // Auto-approve milestones after 10 seconds of being in review (for demo purposes)
   useEffect(() => {
@@ -57,7 +57,9 @@ export const MilestoneTracker: React.FC<MilestoneTrackerProps> = ({ projectId, m
 
     // Cleanup on unmount
     return () => {
-      Object.values(autoApproveTimers.current).forEach(timer => clearTimeout(timer));
+      Object.values(autoApproveTimers.current).forEach((timer) => {
+        clearTimeout(timer as ReturnType<typeof setTimeout>);
+      });
     };
   }, [milestones, projectId, simulateReleaseFunds]);
 
@@ -265,7 +267,7 @@ export const MilestoneTracker: React.FC<MilestoneTrackerProps> = ({ projectId, m
                             size="sm" 
                             onClick={() => handleApprove(m)} 
                             disabled={!!processingId} 
-                            className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                            className=""
                           >
                             {processingId === m.id ? <Loader2 className="animate-spin mr-2" size={14} /> : <CheckCircle size={14} className="mr-2" />}
                             Verify & Release ${m.amount.toLocaleString()}
